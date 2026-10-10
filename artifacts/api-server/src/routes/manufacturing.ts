@@ -3,7 +3,7 @@ import { randomUUID, randomBytes } from "node:crypto";
 import { db, companiesTable, membersTable, jobsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import * as V from "@workspace/api-zod";
-import { calculated, audit, sampleJobs, validateSubmission } from "../lib/material";
+import { calculated, audit, sampleJobs, validateSubmission, transferRework } from "../lib/material";
 const r:IRouter=Router();
 const fail=(status:number,message:string)=>Object.assign(new Error(message),{status});
 function parse(schema:any,body:any){const p=schema.safeParse(body);if(!p.success)throw fail(400,"Invalid input: "+p.error.issues.map((x:any)=>`${x.path.join(".")}: ${x.message}`).join("; "));return p.data;}
@@ -78,6 +78,22 @@ r.patch("/companies/:companyId/settings/:settingId",async(q,s)=>{s.json(out(V.Up
 r.get("/companies/:companyId/members",async(q,s)=>{
  await member(q,["admin"]);s.json(out(V.ListMembersResponse,await db.select().from(membersTable).where(eq(membersTable.companyId,String(q.params.companyId)))));
 });
+r.get("/companies/:companyId/assignees",async(q,s)=>{
+ const m=await member(q);
+ const rows=await db.select().from(membersTable).where(eq(membersTable.companyId,m.companyId));
+ s.json(out(V.ListAssigneesResponse,rows.filter(x=>x.userId&&(x.role==="operator"||x.userId===q.user!.id)).map(x=>({userId:x.userId,name:x.name,role:x.role}))));
+});
+async function assignment(q:any,m:any,b:any,old?:any){
+ const target=b.assignedTo===undefined?(old?.assignedTo??(m.role==="operator"?q.user.id:null)):b.assignedTo;
+ if(old&&m.role==="operator"&&target!==(old.assignedTo??null))throw fail(403,"Only a supervisor, manager or admin can reassign a job.");
+ if(!old&&m.role==="operator"&&target!==q.user.id)throw fail(403,"Operators must assign new jobs to themselves.");
+ if(!target)return {assignedTo:null,assignedName:""};
+ const [person]=await db.select().from(membersTable).where(and(eq(membersTable.companyId,m.companyId),eq(membersTable.userId,target)));
+ if(!person)throw fail(400,"Select a joined member of this company.");
+ if(target!==old?.assignedTo&&person.role!=="operator"&&target!==q.user.id)throw fail(400,"Select a joined operator or yourself.");
+ return {assignedTo:target,assignedName:person.name};
+}
+const operatorCanEdit=(old:any,userId:string)=>old.assignedTo?old.assignedTo===userId:old.createdBy===userId;
 r.post("/companies/:companyId/members",async(q,s)=>{
  await member(q,["admin"]);const b=parse(V.InviteMemberBody,q.body);
  if(!b.name.trim())throw fail(400,"Enter the team member's name.");
@@ -100,8 +116,9 @@ function checkSettings(b:any,c:any,old?:any){
 }
 r.post("/companies/:companyId/jobs",async(q,s)=>{
  const m=await member(q);const b=parse(V.CreateJobBody,q.body);const c=await company(m.companyId);checkSettings(b,c);
+ const assigned=await assignment(q,m,b);
  const now=new Date().toISOString();
- const j=calculated({...b,plannedYield:b.plannedYield??null,id:randomUUID(),companyId:m.companyId,number:b.number.trim(),version:1,status:"draft",createdBy:q.user!.id,createdAt:now,updatedAt:now,isSample:false,audit:[audit(m.name,"created")]});
+ const j=calculated({...b,...assigned,pendingRework:b.pendingRework??null,recordingVersion:2,plannedYield:b.plannedYield??null,id:randomUUID(),companyId:m.companyId,number:b.number.trim(),version:1,status:"draft",createdBy:q.user!.id,createdAt:now,updatedAt:now,isSample:false,audit:[audit(m.name,"created")]});
  if(!j.number)throw fail(400,"Job number is required.");
  await db.insert(jobsTable).values({id:j.id,companyId:j.companyId,number:j.number,data:j});
  s.json(out(V.CreateJobResponse,j));
@@ -124,7 +141,7 @@ async function changeJob(q:any,action:boolean){
   if(["approve","return","reopen"].includes(a)&&!supervisor)throw fail(403,"Supervisor permission is required.");
   if(a==="submit"){
    if(!["draft","returned"].includes(old.status))throw fail(409,"Only draft or returned jobs can be submitted.");
-   if(m.role==="operator"&&old.createdBy!==q.user.id)throw fail(403,"You can submit only your own jobs.");
+   if(m.role==="operator"&&!operatorCanEdit(old,q.user.id))throw fail(403,"You can submit only jobs assigned to you.");
    const error=validateSubmission(old,Number(c.tolerance));if(error)throw fail(400,error);
   }else if(a==="reopen"){if(old.status!=="approved")throw fail(409,"Only approved jobs can be reopened.");}
   else if(old.status!=="submitted")throw fail(409,"This job is not awaiting review.");
@@ -133,10 +150,12 @@ async function changeJob(q:any,action:boolean){
   next={...old,status:({submit:"submitted",approve:"approved",return:"returned",reopen:"draft"} as any)[a],audit:[...old.audit,audit(m.name,a,b.comment||"")]};
  }else{
   if(!["draft","returned"].includes(old.status))throw fail(409,"Reopen this job before editing.");
-  if(m.role==="operator"&&old.createdBy!==q.user.id)throw fail(403,"You can edit only your own jobs.");
+  if(m.role==="operator"&&!operatorCanEdit(old,q.user.id))throw fail(403,"You can edit only jobs assigned to you.");
+  if(old.reworkResolved>0&&["issued","good","offcuts","pendingRework","scrap","unit","material"].some(k=>JSON.stringify(b[k]===undefined?old[k]:b[k])!==JSON.stringify(old[k])))throw fail(400,"Outcomes are locked after rework resolution. Use Resolve rework for further transfers.");
+  const assigned=await assignment(q,m,b,old);
   checkSettings(b,c,old);
   const changes=Object.keys(b).filter(k=>k!=="version"&&JSON.stringify(b[k])!==JSON.stringify(old[k])).map(k=>`${k}: ${JSON.stringify(old[k])} → ${JSON.stringify(b[k])}`).join("; ");
-  next={...old,...b,number:b.number.trim(),audit:[...old.audit,audit(m.name,"updated","",changes)]};
+  next={...old,...b,...assigned,number:b.number.trim(),audit:[...old.audit,audit(m.name,"updated","",changes)]};
  }
  next=calculated({...next,version:old.version+1,updatedAt:new Date().toISOString()});
  await tx.update(jobsTable).set({number:next.number,data:next,version:next.version}).where(eq(jobsTable.id,row.id));
@@ -145,10 +164,28 @@ async function changeJob(q:any,action:boolean){
 }
 r.patch("/companies/:companyId/jobs/:jobId",async(q,s)=>{s.json(out(V.UpdateJobResponse,await changeJob(q,false)));});
 r.post("/companies/:companyId/jobs/:jobId/actions",async(q,s)=>{s.json(out(V.TransitionJobResponse,await changeJob(q,true)));});
+r.post("/companies/:companyId/jobs/:jobId/rework",async(q,s)=>{
+ const m=await member(q);const b=parse(V.ResolveReworkBody,q.body);const c=await company(m.companyId);
+ const result=await db.transaction(async tx=>{
+  const [row]=await tx.select().from(jobsTable).where(and(eq(jobsTable.id,String(q.params.jobId)),eq(jobsTable.companyId,m.companyId))).for("update");
+  if(!row)throw fail(404,"Job not found.");
+  const old=calculated(row.data);
+  if(m.role==="operator"&&!operatorCanEdit(old,q.user!.id))throw fail(403,"This job is not assigned to you.");
+  if(b.version!==old.version)throw fail(409,"This job changed. Reload before resolving rework.");
+  if(!["draft","returned"].includes(old.status))throw fail(409,"Return or reopen this job before resolving rework.");
+  checkSettings({...old,scrap:b.scrap},c,old);
+  let next:any;try{next=transferRework(old,b);}catch(e){throw fail(400,(e as Error).message);}
+  next={...next,version:old.version+1,updatedAt:new Date().toISOString(),audit:[...old.audit,audit(m.name,"rework resolved",b.comment.trim(),`Pending: ${old.pendingRework} → ${next.pendingRework}; good +${b.good}; reusable +${b.offcuts}; scrap +${next.scrapTotal-old.scrapTotal}. Issued unchanged.`)]};
+  await tx.update(jobsTable).set({data:next,version:next.version}).where(eq(jobsTable.id,row.id));
+  return next;
+ });
+ s.json(out(V.ResolveReworkResponse,result));
+});
 r.get("/companies/:companyId/summary",async(q,s)=>{
  const jobs=await list(q), units:Record<string,any>={},categories:Record<string,any>={};
  for(const j of jobs.filter(j=>["approved","submitted"].includes(j.status))){
-  const u=units[j.unit]??={unit:j.unit,issued:0,good:0,scrap:0,offcuts:0,yieldRate:0};
+  const u=units[j.unit]??={unit:j.unit,issued:0,good:0,scrap:0,offcuts:0,pendingRework:0,yieldRate:0};
+  u.pendingRework+=j.pendingRework??0;
   u.issued+=j.issued||0;u.good+=j.good||0;u.scrap+=j.scrapTotal;u.offcuts+=j.offcuts||0;u.yieldRate=u.issued?u.good/u.issued*100:0;
   for(const x of j.scrap){const key=JSON.stringify([j.unit,x.reason]);const cat=categories[key]??={reason:x.reason,unit:j.unit,quantity:0};cat.quantity+=x.quantity||0;}
  }

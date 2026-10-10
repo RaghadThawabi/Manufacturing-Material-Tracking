@@ -20,6 +20,7 @@ import type {
 
 import type {
   ActionInput,
+  Assignee,
   AuthUserEnvelope,
   BeginBrowserLoginParams,
   Company,
@@ -37,6 +38,7 @@ import type {
   MemberInput,
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
+  ReworkInput,
   Setting,
   SettingInput,
   Summary
@@ -1406,6 +1408,162 @@ export function useGetDemoJobs<TData = Awaited<ReturnType<typeof getDemoJobs>>, 
 
 
 
+
+export const getListAssigneesUrl = (companyId: string,) => {
+
+
+
+
+  return `/api/companies/${companyId}/assignees`
+}
+
+export const listAssignees = async (companyId: string, options?: Parameters<typeof customFetch>[1]): Promise<Assignee[]> => {
+
+  return customFetch<Assignee[]>(getListAssigneesUrl(companyId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAssigneesQueryKey = (companyId: string,) => {
+    return [
+    `/api/companies/${companyId}/assignees`
+    ] as const;
+    }
+
+
+export const getListAssigneesQueryOptions = <TData = Awaited<ReturnType<typeof listAssignees>>, TError = ErrorType<unknown>>(companyId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAssignees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAssigneesQueryKey(companyId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAssignees>>> = ({ signal }) => listAssignees(companyId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: companyId !== null && companyId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAssignees>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAssigneesQueryResult = NonNullable<Awaited<ReturnType<typeof listAssignees>>>
+export type ListAssigneesQueryError = ErrorType<unknown>
+
+
+
+export function useListAssignees<TData = Awaited<ReturnType<typeof listAssignees>>, TError = ErrorType<unknown>>(
+ companyId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAssignees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAssigneesQueryOptions(companyId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getResolveReworkUrl = (companyId: string,
+    jobId: string,) => {
+
+
+
+
+  return `/api/companies/${companyId}/jobs/${jobId}/rework`
+}
+
+export const resolveRework = async (companyId: string,
+    jobId: string,
+    reworkInput: ReworkInput, options?: Parameters<typeof customFetch>[1]): Promise<Job> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Job>(getResolveReworkUrl(companyId,jobId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reworkInput)
+  }
+);}
+
+
+
+
+
+export const getResolveReworkMutationKey = () => ['resolveRework'] as const;
+
+export const getResolveReworkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resolveRework>>, TError,ResolveReworkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resolveRework>>, TError,ResolveReworkMutationVariables, TContext> => {
+
+const mutationKey = getResolveReworkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resolveRework>>, ResolveReworkMutationVariables> = (props) => {
+          const {companyId,jobId,data} = props ?? {};
+
+          return  resolveRework(companyId,jobId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResolveReworkMutationResult = NonNullable<Awaited<ReturnType<typeof resolveRework>>>
+    export type ResolveReworkMutationBody = BodyType<ReworkInput>
+    export type ResolveReworkMutationError = ErrorType<unknown>
+    export type ResolveReworkMutationVariables = {companyId: string;jobId: string;data: BodyType<ReworkInput>}
+
+    export const useResolveRework = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resolveRework>>, TError,ResolveReworkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof resolveRework>>,
+        TError,
+        ResolveReworkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getResolveReworkMutationOptions(options));
+    }
 
 export const getGetCurrentAuthUserUrl = () => {
 

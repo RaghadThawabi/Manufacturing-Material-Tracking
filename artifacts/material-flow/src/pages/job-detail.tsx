@@ -3,13 +3,14 @@ import { Link, useParams } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Check, RotateCcw, Unlock } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
-import { useGetJob, getGetJobQueryKey, useUpdateJob, useTransitionJob, getListJobsQueryKey, getGetSummaryQueryKey, type JobInput, type ActionInputAction } from "@workspace/api-client-react";
+import { useListAssignees, getListAssigneesQueryKey, useGetJob, getGetJobQueryKey, useUpdateJob, useTransitionJob, getListJobsQueryKey, getGetSummaryQueryKey, type JobInput, type ActionInputAction } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PageHeader, StatusBadge, SampleFlag, FlowBar, Legend, Metric, AuditTrail, ErrorPanel } from "@/components/mf-ui";
+import { PageHeader, StatusBadge, SampleFlag, FlowBar, Legend, Metric, AuditTrail, ErrorPanel, BalanceText } from "@/components/mf-ui";
+import { ReworkPanel, ReworkLifecycle } from "@/components/rework-panel";
 import { JobWizard } from "@/components/job-wizard";
-import { canReview, errMsg, fmt, jobToInput, pct, useCompany } from "@/lib/mf";
+import { canReview, errMsg, fmt, isConflict, jobToInput, measurement, pct, useCompany } from "@/lib/mf";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,8 @@ export default function JobDetail() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const q = useGetJob(cid, jobId, { query: { queryKey: getGetJobQueryKey(cid, jobId), refetchInterval: 20000 } });
+  const reviewerRole = canReview(company!.role);
+  const as = useListAssignees(cid, { query: { queryKey: getListAssigneesQueryKey(cid), enabled: reviewerRole } });
   const update = useUpdateJob();
   const transition = useTransitionJob();
   const [editing, setEditing] = useState(false);
@@ -36,16 +39,21 @@ export default function JobDetail() {
   if (q.isLoading) return <div className="space-y-4"><Skeleton className="h-16" /><Skeleton className="h-40" /><Skeleton className="h-64" /></div>;
   if (q.error || !q.data) return <ErrorPanel message={errMsg(q.error) || "Job not found."} onRetry={() => q.refetch()} />;
   const job = q.data;
-  const own = job.createdBy === user?.id;
-  const reviewer = canReview(company!.role);
+  const rv = job.recordingVersion ?? 1;
+  const own = job.assignedTo ? job.assignedTo === user?.id : job.createdBy === user?.id;
+  const reviewer = reviewerRole;
   const editable = (job.status === "draft" || job.status === "returned") && (own || reviewer);
+  const resolved = (job.reworkResolved ?? 0) > 0;
+  const pendingQty = job.pendingRework ?? 0;
+  const m = measurement(job, rv);
+  const conflict = (e: unknown) => { if (isConflict(e)) { refresh(); return "This job was changed by someone else. The latest version has been loaded — review it and try again."; } return errMsg(e); };
 
   const act = (action: ActionInputAction) => {
     setErr("");
     if ((action === "return" || action === "reopen") && !comment.trim()) { setErr("A comment is required to return or reopen a job."); return; }
     transition.mutate({ companyId: cid, jobId, data: { action, version: job.version, comment: comment.trim() || undefined } }, {
       onSuccess: () => { setComment(""); refresh(); toast({ title: `Job ${action === "submit" ? "submitted" : action === "approve" ? "approved" : action === "return" ? "returned" : "reopened"}` }); },
-      onError: (e) => setErr(errMsg(e)),
+      onError: (e) => setErr(conflict(e)),
     });
   };
 
@@ -56,13 +64,14 @@ export default function JobDetail() {
       if (submit) await transition.mutateAsync({ companyId: cid, jobId, data: { action: "submit", version: saved.version } });
       refresh(); setEditing(false);
       toast({ title: submit ? "Submitted for review" : "Changes saved" });
-    } catch (e) { setErr(errMsg(e)); }
+    } catch (e) { setErr(conflict(e)); }
   };
 
   if (editing) return (
     <>
       <PageHeader eyebrow={`Editing · v${job.version}`} title={`Job ${job.number}`} />
-      <JobWizard company={company!} initial={jobToInput(job)} pending={update.isPending || transition.isPending} error={err} onSave={save} onCancel={() => setEditing(false)} />
+      <JobWizard company={company!} initial={jobToInput(job)} recordingVersion={rv} outcomesLocked={resolved}
+        assignees={as.data ?? []} assignMode={reviewer ? "any" : "locked"} assignedName={job.assignedName} pending={update.isPending || transition.isPending} error={err} onSave={save} onCancel={() => setEditing(false)} />
     </>
   );
 
@@ -81,22 +90,28 @@ export default function JobDetail() {
         <div className="space-y-6">
           <section className="rise rounded-md border bg-card p-5">
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-              {[["Material", job.material], ["Machine", job.machine], ["Product", job.product], ["Unit", job.unit]].map(([k, v]) => <div key={k}><p className="text-xs uppercase text-muted-foreground">{k}</p><p className="font-semibold">{v || "—"}</p></div>)}
+              {[["Material", job.material], ["Machine", job.machine], ["Product", job.product], ["Unit", job.unit],
+                ["Assigned to", job.assignedName || (job.assignedTo ? "Assigned" : "Unassigned")],
+                ["Sheet (mm)", job.sheetWidthMm && job.sheetLengthMm ? `${fmt(job.sheetWidthMm)} x ${fmt(job.sheetLengthMm)}` : "—"],
+                ["Offcut size", job.offcutSizeNote || "—"], ["Offcut storage", job.offcutLocation || "—"]].map(([k, v]) => <div key={k}><p className="text-xs uppercase text-muted-foreground">{k}</p><p className="font-semibold">{v || "—"}</p></div>)}
             </div>
-            {job.unsupported && <p className="mt-4 rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">Flagged as rework / multi-stage / multi-material — not supported in Phase 1.</p>}
+            {job.unsupported && <p className="mt-4 rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">Flagged as multi-stage / multi-material — not supported.</p>}
+            {rv < 2 && <p className="mt-4 text-xs text-muted-foreground">Legacy record (recording version 1): assignment, sheet size and pending rework were not required.</p>}
             {job.instructions && <p className="mt-4 border-t pt-4 text-sm"><span className="font-semibold">Instructions: </span>{job.instructions}</p>}
             {job.notes && <p className="mt-2 text-sm"><span className="font-semibold">Notes: </span>{job.notes}</p>}
           </section>
           <section className="rise rounded-md border bg-card p-5" style={{ animationDelay: "60ms" }}>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
               <Metric label="Issued" value={fmt(job.issued)} unit={u} />
               <Metric label="Good" value={fmt(job.good)} unit={u} tone="good" sub={`Yield ${pct(job.yieldRate)}${job.plannedYield != null ? ` · plan ${pct(job.plannedYield)}` : ""}`} />
               <Metric label="Reusable" value={fmt(job.offcuts)} unit={u} tone="reuse" sub={pct(job.offcutRate)} />
               <Metric label="Scrap" value={fmt(job.scrapTotal)} unit={u} tone="waste" sub={pct(job.scrapRate)} />
+              <Metric label="Pending rework" value={fmt(job.pendingRework)} unit={u} tone="pending" sub={resolved ? `${fmt(job.reworkResolved)} resolved` : job.pendingRework == null ? "Not measured" : undefined} />
             </div>
-            <FlowBar className="mt-5 h-5" issued={job.issued ?? 0} good={job.good ?? 0} scrap={job.scrapTotal} offcuts={job.offcuts ?? 0} />
+            <FlowBar className="mt-5 h-5" issued={job.issued ?? 0} good={job.good ?? 0} scrap={job.scrapTotal} offcuts={job.offcuts ?? 0} pending={pendingQty} />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3"><Legend />
               <span className={cn("num rounded-sm px-2 py-1 text-sm font-semibold", balanced ? "bg-good/10 text-good" : "bg-destructive/10 text-destructive")}>Residual {fmt(job.difference, 3)} {u}</span></div>
+            <div className="mt-3"><BalanceText issued={job.issued} accounted={(job.issued ?? 0) - job.difference} unit={u} tolerance={company!.tolerance} measured={m.measured} total={m.total} missing={m.missing} /></div>
             <table className="mt-5 w-full text-sm">
               <thead><tr className="border-b text-left text-xs uppercase text-muted-foreground"><th className="py-2">Scrap reason (as recorded)</th><th className="py-2 text-right">Quantity</th></tr></thead>
               <tbody>{job.scrap.map((s, i) => <tr key={i} className="border-b last:border-0"><td className="py-2"><i className="mr-2 inline-block h-2.5 w-2.5 rounded-[2px] bg-waste" />{s.reason || "—"}</td><td className="num py-2 text-right">{s.quantity === null ? "Not measured" : `${fmt(s.quantity)} ${u}`}</td></tr>)}</tbody>
@@ -119,7 +134,11 @@ export default function JobDetail() {
               </div>
             </section>
           )}
-          {!editable && !reviewer && job.status !== "approved" && <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">{job.status === "submitted" ? "Awaiting supervisor review." : "Only the operator who recorded this job can edit it."}</p>}
+          {editable && pendingQty > 0 && <ReworkPanel job={job} company={company!} />}
+          {!editable && pendingQty > 0 && <p className="rounded-md border border-pending bg-pending-soft p-4 text-sm"><span className="num font-semibold text-pending">{fmt(pendingQty, 3)} {u}</span> pending rework. {job.status === "approved" ? "A reviewer must reopen this job before rework can be resolved." : job.status === "submitted" ? "Return the job to resolve rework." : "Only the assigned operator or a reviewer can resolve it."}</p>}
+          {resolved && <p data-testid="text-rework-resolved" className="rounded-md border p-3 text-xs text-muted-foreground"><span className="num font-semibold">{fmt(job.reworkResolved, 3)} {u}</span> resolved from rework. Outcome quantities are locked; details remain editable.</p>}
+          <ReworkLifecycle />
+          {!editable && !reviewer && job.status !== "approved" && <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">{job.status === "submitted" ? "Awaiting supervisor review." : (rv >= 2 ? "Only the assigned operator or a reviewer can edit this job." : "Only the operator who recorded this job can edit it.")}</p>}
           <ErrorPanel message={err} />
         </aside>
       </div>

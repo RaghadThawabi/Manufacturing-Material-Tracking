@@ -22,6 +22,17 @@ const schemas = {
  Summary:obj({jobs:{type:'integer'},pending:{type:'integer'},approved:{type:'integer'},drafts:{type:'integer'},units:{type:'array',items:obj({unit:str,issued:{type:'number'},good:{type:'number'},scrap:{type:'number'},offcuts:{type:'number'},yieldRate:{type:'number'}})},categories:{type:'array',items:obj({reason:str,unit:str,quantity:{type:'number'}})}}),
 };
 const paths={};
+const phase2Fields={
+ sheetWidthMm:num,sheetLengthMm:num,assignedTo:{type:['string','null']},
+ offcutSizeNote:str,offcutLocation:str,pendingRework:num
+};
+Object.assign(schemas.JobInput.properties,phase2Fields);
+schemas.Summary.properties.units.items.properties.pendingRework={type:'number'};
+Object.assign(schemas.Job.properties,phase2Fields,{
+ assignedName:str,recordingVersion:{type:'integer'},reworkResolved:{type:'number'}
+});
+schemas.Assignee=obj({userId:str,name:str,role:str});
+schemas.ReworkInput=obj({version:{type:'integer'},good:{type:'number',minimum:0},offcuts:{type:'number',minimum:0},scrap:arr('Scrap'),comment:{type:'string',minLength:1}});
 function endpoint(path,method,id,response,body,params=[]){
  const op={operationId:id,parameters:params.map(n=>({name:n,in:'path',required:true,schema:str})),responses:{'200':{description:'Success',content:{'application/json':{schema:response}}}}};
  if(body)op.requestBody={required:true,content:{'application/json':{schema:ref(body)}}};
@@ -44,6 +55,8 @@ endpoint('/companies/{companyId}/jobs/{jobId}','patch','updateJob',ref('Job'),'J
 endpoint('/companies/{companyId}/jobs/{jobId}/actions','post','transitionJob',ref('Job'),'ActionInput',['companyId','jobId']);
 endpoint('/companies/{companyId}/summary','get','getSummary',ref('Summary'),null,['companyId']);
 endpoint('/demo/jobs','get','getDemoJobs',arr('Job'));
+endpoint('/companies/{companyId}/assignees','get','listAssignees',arr('Assignee'),null,['companyId']);
+endpoint('/companies/{companyId}/jobs/{jobId}/rework','post','resolveRework',ref('Job'),'ReworkInput',['companyId','jobId']);
 const text=fs.readFileSync('.local/skills/replit-auth/references/openapi.md','utf8');
 // Preserve supplied auth specification blocks as YAML alongside JSON-compatible YAML.
 const blocks=[...text.matchAll(/```yaml\n([\s\S]*?)```/g)].map(m=>m[1]);

@@ -149,6 +149,25 @@ export interface JobInput {
   plannedYield?: number | null;
   unsupported: boolean;
   version?: number;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetWidthMm?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetLengthMm?: number | null;
+  /** @nullable */
+  assignedTo?: string | null;
+  offcutSizeNote?: string;
+  offcutLocation?: string;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  pendingRework?: number | null;
 }
 
 export interface Audit {
@@ -212,6 +231,28 @@ export interface Job {
   scrapRate: number;
   offcutRate: number;
   audit: Audit[];
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetWidthMm?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetLengthMm?: number | null;
+  /** @nullable */
+  assignedTo?: string | null;
+  offcutSizeNote?: string;
+  offcutLocation?: string;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  pendingRework?: number | null;
+  assignedName?: string;
+  recordingVersion?: number;
+  reworkResolved?: number;
 }
 
 export type ActionInputAction = typeof ActionInputAction[keyof typeof ActionInputAction];
@@ -237,6 +278,7 @@ export type SummaryUnitsItem = {
   scrap: number;
   offcuts: number;
   yieldRate: number;
+  pendingRework?: number;
 };
 
 export type SummaryCategoriesItem = {
@@ -252,6 +294,23 @@ export interface Summary {
   drafts: number;
   units: SummaryUnitsItem[];
   categories: SummaryCategoriesItem[];
+}
+
+export interface Assignee {
+  userId: string;
+  name: string;
+  role: string;
+}
+
+export interface ReworkInput {
+  version: number;
+  /** @minimum 0 */
+  good: number;
+  /** @minimum 0 */
+  offcuts: number;
+  scrap: Scrap[];
+  /** @minLength 1 */
+  comment: string;
 }
 
 export interface AuthUser {

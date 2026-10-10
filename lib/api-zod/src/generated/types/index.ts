@@ -7,6 +7,7 @@
 
 export * from './actionInput';
 export * from './actionInputAction';
+export * from './assignee';
 export * from './audit';
 export * from './authorizationSessionHeaderParameter';
 export * from './authUser';
@@ -30,6 +31,7 @@ export * from './memberInput';
 export * from './memberInputRole';
 export * from './mobileTokenExchangeRequest';
 export * from './mobileTokenExchangeSuccess';
+export * from './reworkInput';
 export * from './scrap';
 export * from './setting';
 export * from './settingInput';

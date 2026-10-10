@@ -394,3 +394,7 @@
 .rise{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
 @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .bar-in{transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both}
+:root{--pending:212 64% 44%}
+.text-pending{color:hsl(var(--pending))}.border-pending{border-color:hsl(var(--pending))}
+.bg-pending-soft{background-color:hsl(var(--pending)/.08)}
+.pending-fill{background-color:hsl(var(--pending));background-image:repeating-linear-gradient(90deg,hsl(0 0% 100%/.22) 0 2px,transparent 2px 6px)}

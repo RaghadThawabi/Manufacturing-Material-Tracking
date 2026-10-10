@@ -40,4 +40,23 @@ export interface JobInput {
   plannedYield?: number | null;
   unsupported: boolean;
   version?: number;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetWidthMm?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetLengthMm?: number | null;
+  /** @nullable */
+  assignedTo?: string | null;
+  offcutSizeNote?: string;
+  offcutLocation?: string;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  pendingRework?: number | null;
 }

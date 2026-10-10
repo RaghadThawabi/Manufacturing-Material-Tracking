@@ -25,16 +25,17 @@ export function SampleFlag() {
   return <span className="inline-flex items-center rounded-sm border border-dashed border-foreground/40 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Sample data</span>;
 }
 
-export function FlowBar({ issued, good, scrap, offcuts, className }: { issued: number; good: number; scrap: number; offcuts: number; className?: string }) {
-  const base = Math.max(issued, good + scrap + offcuts, 1);
+export function FlowBar({ issued, good, scrap, offcuts, pending = 0, className }: { issued: number; good: number; scrap: number; offcuts: number; pending?: number; className?: string }) {
+  const base = Math.max(issued, good + scrap + offcuts + pending, 1);
   const w = (v: number) => `${Math.max(0, (v / base) * 100)}%`;
-  const gap = issued - good - scrap - offcuts;
+  const gap = issued - good - scrap - offcuts - pending;
   return (
     <div className={cn("flex h-3 w-full overflow-hidden rounded-sm bg-muted", className)}>
       <div className="bar-in bg-good transition-all duration-500" style={{ width: w(good) }} title={`Good ${fmt(good)}`} />
       <div className="bar-in bg-reuse transition-all duration-500" style={{ width: w(offcuts) }} title={`Reusable ${fmt(offcuts)}`} />
       <div className="bar-in bg-waste transition-all duration-500" style={{ width: w(scrap) }} title={`Scrap ${fmt(scrap)}`} />
-      {gap > 0 && <div className="hazard opacity-60" style={{ width: w(gap) }} title={`Unaccounted ${fmt(gap)}`} />}
+      {pending > 0 && <div className="bar-in pending-fill transition-all duration-500" style={{ width: w(pending) }} title={`Pending rework ${fmt(pending)}`} />}
+      {gap > 0 && <div className="hazard opacity-60" style={{ width: w(gap) }} title={`Unexplained ${fmt(gap)}`} />}
     </div>
   );
 }
@@ -45,10 +46,38 @@ export function Legend() {
       <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[2px] bg-good" />Good</span>
       <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[2px] bg-reuse" />Reusable offcuts</span>
       <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[2px] bg-waste" />Scrap / waste</span>
-      <span className="flex items-center gap-1.5"><i className="hazard h-2.5 w-2.5 rounded-[2px]" />Unaccounted</span>
+      <span className="flex items-center gap-1.5"><i className="pending-fill h-2.5 w-2.5 rounded-[2px]" />Pending rework</span>
+      <span className="flex items-center gap-1.5"><i className="hazard h-2.5 w-2.5 rounded-[2px]" />Unexplained</span>
     </div>
   );
 }
+
+/** Plain-language balance: accounted vs unexplained, plus measurement completeness. */
+export function BalanceText({ issued, accounted, unit, tolerance, measured, total, missing, testId = "text-balance" }: {
+  issued: number | null; accounted: number; unit: string; tolerance: number; measured?: number; total?: number; missing?: string[]; testId?: string;
+}) {
+  const gap = (issued ?? 0) - accounted;
+  const ok = issued !== null && issued > 0 && Math.abs(gap) <= tolerance + 1e-8;
+  return (
+    <div data-testid={testId} className="space-y-1 text-sm">
+      <p>
+        <span className="font-semibold">Accounted</span> <span className="num">{fmt(accounted, 3)}</span> of <span className="num">{fmt(issued, 3)}</span> {unit}
+        {" · "}
+        <span className={cn("font-semibold", ok ? "text-good" : issued ? "text-destructive" : "text-muted-foreground")}>
+          {gap > 0 ? `Unexplained ${fmt(gap, 3)}` : gap < 0 ? `Over-recorded ${fmt(-gap, 3)}` : "Nothing unexplained"}
+        </span>{gap !== 0 && ` ${unit}`}
+      </p>
+      {total !== undefined && (
+        <p className="text-xs text-muted-foreground">
+          Measurement <span className="num">{measured}/{total}</span>{missing && missing.length > 0 ? ` · not measured: ${missing.join(", ")}` : " · complete"}
+        </p>
+      )}
+    </div>
+  );
+}
+
+type UnitRow = Summary["units"][number] & { pendingRework?: number };
+const pendOf = (u: UnitRow) => u.pendingRework ?? 0;
 
 export function ErrorPanel({ message, onRetry, title = "Could not complete" }: { message: string; onRetry?: () => void; title?: string }) {
   if (!message) return null;
@@ -73,10 +102,10 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; tit
   );
 }
 
-export function Metric({ label, value, unit, tone, sub }: { label: string; value: string; unit?: string; tone?: "good" | "waste" | "reuse"; sub?: string }) {
+export function Metric({ label, value, unit, tone, sub }: { label: string; value: string; unit?: string; tone?: "good" | "waste" | "reuse" | "pending"; sub?: string }) {
   return (
     <div className="relative overflow-hidden rounded-md border bg-card p-4">
-      {tone && <span className={cn("absolute inset-y-0 left-0 w-1", tone === "good" ? "bg-good" : tone === "waste" ? "bg-waste" : "bg-reuse")} />}
+      {tone && <span className={cn("absolute inset-y-0 left-0 w-1", tone === "good" ? "bg-good" : tone === "waste" ? "bg-waste" : tone === "pending" ? "pending-fill" : "bg-reuse")} />}
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className="num mt-2 text-2xl font-semibold">{value}{unit && <span className="ml-1 text-sm text-muted-foreground">{unit}</span>}</p>
       {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
@@ -84,13 +113,13 @@ export function Metric({ label, value, unit, tone, sub }: { label: string; value
   );
 }
 
-export function QtyField({ label, value, onChange, tone, unit, hint, testId }: { label: string; value: number | null; onChange: (v: number | null) => void; tone?: "good" | "waste" | "reuse"; unit?: string; hint?: string; testId: string }) {
+export function QtyField({ label, value, onChange, tone, unit, hint, testId, disabled }: { label: string; value: number | null; onChange: (v: number | null) => void; tone?: "good" | "waste" | "reuse" | "pending"; unit?: string; hint?: string; testId: string; disabled?: boolean }) {
   const step = (d: number) => onChange(Math.max(0, (value ?? 0) + d));
   return (
-    <div className={cn("rounded-md border-2 bg-card p-4 transition-colors", value === null ? "border-dashed border-input" : tone === "good" ? "border-good" : tone === "waste" ? "border-waste" : tone === "reuse" ? "border-reuse" : "border-primary")}>
+    <fieldset disabled={disabled} className={cn("rounded-md border-2 bg-card p-4 transition-colors disabled:opacity-60", value === null ? "border-dashed border-input" : tone === "good" ? "border-good" : tone === "waste" ? "border-waste" : tone === "reuse" ? "border-reuse" : tone === "pending" ? "border-pending" : "border-primary")}>
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
-          {tone && <i className={cn("h-3 w-3 rounded-[2px]", tone === "good" ? "bg-good" : tone === "waste" ? "bg-waste" : "bg-reuse")} />}{label}
+          {tone && <i className={cn("h-3 w-3 rounded-[2px]", tone === "good" ? "bg-good" : tone === "waste" ? "bg-waste" : tone === "pending" ? "pending-fill" : "bg-reuse")} />}{label}
         </label>
         <span className="text-xs text-muted-foreground">{value === null ? "Not measured" : unit}</span>
       </div>
@@ -105,7 +134,7 @@ export function QtyField({ label, value, onChange, tone, unit, hint, testId }: {
         <Button type="button" variant="outline" className="h-14 w-14 shrink-0" onClick={() => step(1)} aria-label="increase" data-testid={`button-inc-${testId}`}><Plus /></Button>
       </div>
       {hint && <p className="mt-2 text-xs text-muted-foreground">{hint}</p>}
-    </div>
+    </fieldset>
   );
 }
 
@@ -125,10 +154,11 @@ export function ChipPicker({ options, value, onChange, testId, empty }: { option
 }
 
 export function summarize(jobs: Job[]): Summary {
-  const units: Record<string, Summary["units"][number]> = {};
+  const units: Record<string, UnitRow> = {};
   const cats: Record<string, Summary["categories"][number]> = {};
   for (const j of jobs) {
-    const u = (units[j.unit] ??= { unit: j.unit, issued: 0, good: 0, scrap: 0, offcuts: 0, yieldRate: 0 });
+    const u: UnitRow = (units[j.unit] ??= { unit: j.unit, issued: 0, good: 0, scrap: 0, offcuts: 0, yieldRate: 0, pendingRework: 0 } as UnitRow);
+    u.pendingRework = pendOf(u) + (j.pendingRework ?? 0);
     u.issued += j.issued ?? 0; u.good += j.good ?? 0; u.scrap += j.scrapTotal; u.offcuts += j.offcuts ?? 0;
     for (const s of j.scrap) { const k = `${s.reason}|${j.unit}`; (cats[k] ??= { reason: s.reason || "Unspecified", unit: j.unit, quantity: 0 }).quantity += s.quantity ?? 0; }
   }
@@ -149,7 +179,7 @@ export function SummaryBoard({ summary }: { summary: Summary }) {
         <Metric label="Drafts" value={String(summary.drafts)} />
       </div>
       {summary.units.length === 0 && <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">No quantities recorded yet.</p>}
-      {summary.units.map((u, i) => {
+      {(summary.units as UnitRow[]).map((u, i) => {
         const cats = summary.categories.filter((c) => c.unit === u.unit).sort((a, b) => b.quantity - a.quantity);
         const max = Math.max(...cats.map((c) => c.quantity), 1);
         return (
@@ -160,14 +190,16 @@ export function SummaryBoard({ summary }: { summary: Summary }) {
             </header>
             <div className="grid gap-6 p-5 lg:grid-cols-[1.3fr_1fr]">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                   <Metric label="Issued" value={fmt(u.issued)} unit={u.unit} />
                   <Metric label="Good" value={fmt(u.good)} unit={u.unit} tone="good" sub={`Yield ${pct(u.yieldRate)}`} />
                   <Metric label="Reusable" value={fmt(u.offcuts)} unit={u.unit} tone="reuse" sub={u.issued ? pct((u.offcuts / u.issued) * 100) : undefined} />
                   <Metric label="Scrap" value={fmt(u.scrap)} unit={u.unit} tone="waste" sub={u.issued ? pct((u.scrap / u.issued) * 100) : undefined} />
+                  <Metric label="Pending rework" value={fmt(pendOf(u))} unit={u.unit} tone="pending" sub={u.issued ? pct((pendOf(u) / u.issued) * 100) : undefined} />
                 </div>
-                <FlowBar issued={u.issued} good={u.good} scrap={u.scrap} offcuts={u.offcuts} className="h-5" />
+                <FlowBar issued={u.issued} good={u.good} scrap={u.scrap} offcuts={u.offcuts} pending={pendOf(u)} className="h-5" />
                 <Legend />
+                <BalanceText issued={u.issued} accounted={u.good + u.offcuts + u.scrap + pendOf(u)} unit={u.unit} tolerance={0} testId={`text-balance-${u.unit}`} />
               </div>
               <div>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Scrap by recorded reason</p>
@@ -197,15 +229,17 @@ export function JobRow({ job, href }: { job: Job; href?: string }) {
         <div className="flex flex-wrap items-center gap-2">
           <span className="num text-base font-semibold">{job.number || "Untitled"}</span>
           <StatusBadge status={job.status} />{job.isSample && <SampleFlag />}
+          {job.assignedName && <span className="text-xs text-muted-foreground">· {job.assignedName}</span>}
         </div>
         <p className="truncate text-sm text-muted-foreground">{job.date} · {job.material || "—"} · {job.machine || "—"} · {job.product || "—"}</p>
       </div>
       <div className="w-full md:w-64">
-        <FlowBar issued={job.issued ?? 0} good={job.good ?? 0} scrap={job.scrapTotal} offcuts={job.offcuts ?? 0} />
+        <FlowBar issued={job.issued ?? 0} good={job.good ?? 0} scrap={job.scrapTotal} offcuts={job.offcuts ?? 0} pending={job.pendingRework ?? 0} />
         <div className="num mt-1.5 flex justify-between text-xs">
           <span>{fmt(job.issued)} {job.unit}</span>
           <span className="text-good">Y {pct(job.yieldRate)}</span>
           <span className="text-waste">S {pct(job.scrapRate)}</span>
+          {(job.pendingRework ?? 0) > 0 && <span className="text-pending">R {fmt(job.pendingRework)}</span>}
           <span className={job.difference === 0 ? "text-muted-foreground" : "font-semibold text-destructive"}>Δ {fmt(job.difference)}</span>
         </div>
       </div>

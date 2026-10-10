@@ -568,6 +568,81 @@
         }
       }
     },
+    "/companies/{companyId}/assignees": {
+      "get": {
+        "operationId": "listAssignees",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Assignee"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/{companyId}/jobs/{jobId}/rework": {
+      "post": {
+        "operationId": "resolveRework",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInput"
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/user": {
       "get": {
         "tags": [
@@ -1096,6 +1171,39 @@
           },
           "version": {
             "type": "integer"
+          },
+          "sheetWidthMm": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "sheetLengthMm": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "assignedTo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "offcutSizeNote": {
+            "type": "string"
+          },
+          "offcutLocation": {
+            "type": "string"
+          },
+          "pendingRework": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
           }
         },
         "required": [
@@ -1258,6 +1366,48 @@
             "items": {
               "$ref": "#/components/schemas/Audit"
             }
+          },
+          "sheetWidthMm": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "sheetLengthMm": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "assignedTo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "offcutSizeNote": {
+            "type": "string"
+          },
+          "offcutLocation": {
+            "type": "string"
+          },
+          "pendingRework": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "assignedName": {
+            "type": "string"
+          },
+          "recordingVersion": {
+            "type": "integer"
+          },
+          "reworkResolved": {
+            "type": "number"
           }
         },
         "required": [
@@ -1352,6 +1502,9 @@
                 },
                 "yieldRate": {
                   "type": "number"
+                },
+                "pendingRework": {
+                  "type": "number"
                 }
               },
               "required": [
@@ -1394,6 +1547,58 @@
           "drafts",
           "units",
           "categories"
+        ]
+      },
+      "Assignee": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "name",
+          "role"
+        ]
+      },
+      "ReworkInput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer"
+          },
+          "good": {
+            "type": "number",
+            "minimum": 0
+          },
+          "offcuts": {
+            "type": "number",
+            "minimum": 0
+          },
+          "scrap": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scrap"
+            }
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "version",
+          "good",
+          "offcuts",
+          "scrap",
+          "comment"
         ]
       },
       "AuthUser": {

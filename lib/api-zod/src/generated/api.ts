@@ -211,6 +211,12 @@ export const listJobsResponseOffcutsMin = 0;
 
 export const listJobsResponseScrapItemQuantityMin = 0;
 
+export const listJobsResponseSheetWidthMmMin = 0;
+
+export const listJobsResponseSheetLengthMmMin = 0;
+
+export const listJobsResponsePendingReworkMin = 0;
+
 
 
 export const ListJobsResponseItem = zod.object({
@@ -251,7 +257,16 @@ export const ListJobsResponseItem = zod.object({
   "at": zod.string(),
   "comment": zod.string(),
   "changes": zod.string()
-}))
+})),
+  "sheetWidthMm": zod.number().min(listJobsResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(listJobsResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(listJobsResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
 })
 export const ListJobsResponse = zod.array(ListJobsResponseItem)
 
@@ -271,6 +286,12 @@ export const createJobBodyScrapItemQuantityMin = 0;
 
 export const createJobBodyPlannedYieldMin = 0;
 export const createJobBodyPlannedYieldMax = 100;
+
+export const createJobBodySheetWidthMmMin = 0;
+
+export const createJobBodySheetLengthMmMin = 0;
+
+export const createJobBodyPendingReworkMin = 0;
 
 
 
@@ -292,7 +313,13 @@ export const CreateJobBody = zod.object({
   "notes": zod.string(),
   "plannedYield": zod.number().min(createJobBodyPlannedYieldMin).max(createJobBodyPlannedYieldMax).nullish(),
   "unsupported": zod.boolean(),
-  "version": zod.number().int().optional()
+  "version": zod.number().int().optional(),
+  "sheetWidthMm": zod.number().min(createJobBodySheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(createJobBodySheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(createJobBodyPendingReworkMin).nullish()
 })
 
 export const createJobResponseIssuedMin = 0;
@@ -302,6 +329,12 @@ export const createJobResponseGoodMin = 0;
 export const createJobResponseOffcutsMin = 0;
 
 export const createJobResponseScrapItemQuantityMin = 0;
+
+export const createJobResponseSheetWidthMmMin = 0;
+
+export const createJobResponseSheetLengthMmMin = 0;
+
+export const createJobResponsePendingReworkMin = 0;
 
 
 
@@ -343,7 +376,16 @@ export const CreateJobResponse = zod.object({
   "at": zod.string(),
   "comment": zod.string(),
   "changes": zod.string()
-}))
+})),
+  "sheetWidthMm": zod.number().min(createJobResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(createJobResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(createJobResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
 })
 
 
@@ -359,6 +401,12 @@ export const getJobResponseGoodMin = 0;
 export const getJobResponseOffcutsMin = 0;
 
 export const getJobResponseScrapItemQuantityMin = 0;
+
+export const getJobResponseSheetWidthMmMin = 0;
+
+export const getJobResponseSheetLengthMmMin = 0;
+
+export const getJobResponsePendingReworkMin = 0;
 
 
 
@@ -400,7 +448,16 @@ export const GetJobResponse = zod.object({
   "at": zod.string(),
   "comment": zod.string(),
   "changes": zod.string()
-}))
+})),
+  "sheetWidthMm": zod.number().min(getJobResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(getJobResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(getJobResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
 })
 
 
@@ -420,6 +477,12 @@ export const updateJobBodyScrapItemQuantityMin = 0;
 
 export const updateJobBodyPlannedYieldMin = 0;
 export const updateJobBodyPlannedYieldMax = 100;
+
+export const updateJobBodySheetWidthMmMin = 0;
+
+export const updateJobBodySheetLengthMmMin = 0;
+
+export const updateJobBodyPendingReworkMin = 0;
 
 
 
@@ -441,7 +504,13 @@ export const UpdateJobBody = zod.object({
   "notes": zod.string(),
   "plannedYield": zod.number().min(updateJobBodyPlannedYieldMin).max(updateJobBodyPlannedYieldMax).nullish(),
   "unsupported": zod.boolean(),
-  "version": zod.number().int().optional()
+  "version": zod.number().int().optional(),
+  "sheetWidthMm": zod.number().min(updateJobBodySheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(updateJobBodySheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(updateJobBodyPendingReworkMin).nullish()
 })
 
 export const updateJobResponseIssuedMin = 0;
@@ -451,6 +520,12 @@ export const updateJobResponseGoodMin = 0;
 export const updateJobResponseOffcutsMin = 0;
 
 export const updateJobResponseScrapItemQuantityMin = 0;
+
+export const updateJobResponseSheetWidthMmMin = 0;
+
+export const updateJobResponseSheetLengthMmMin = 0;
+
+export const updateJobResponsePendingReworkMin = 0;
 
 
 
@@ -492,7 +567,16 @@ export const UpdateJobResponse = zod.object({
   "at": zod.string(),
   "comment": zod.string(),
   "changes": zod.string()
-}))
+})),
+  "sheetWidthMm": zod.number().min(updateJobResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(updateJobResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(updateJobResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
 })
 
 
@@ -514,6 +598,12 @@ export const transitionJobResponseGoodMin = 0;
 export const transitionJobResponseOffcutsMin = 0;
 
 export const transitionJobResponseScrapItemQuantityMin = 0;
+
+export const transitionJobResponseSheetWidthMmMin = 0;
+
+export const transitionJobResponseSheetLengthMmMin = 0;
+
+export const transitionJobResponsePendingReworkMin = 0;
 
 
 
@@ -555,7 +645,16 @@ export const TransitionJobResponse = zod.object({
   "at": zod.string(),
   "comment": zod.string(),
   "changes": zod.string()
-}))
+})),
+  "sheetWidthMm": zod.number().min(transitionJobResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(transitionJobResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(transitionJobResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
 })
 
 
@@ -574,7 +673,8 @@ export const GetSummaryResponse = zod.object({
   "good": zod.number(),
   "scrap": zod.number(),
   "offcuts": zod.number(),
-  "yieldRate": zod.number()
+  "yieldRate": zod.number(),
+  "pendingRework": zod.number().optional()
 })),
   "categories": zod.array(zod.object({
   "reason": zod.string(),
@@ -591,6 +691,12 @@ export const getDemoJobsResponseGoodMin = 0;
 export const getDemoJobsResponseOffcutsMin = 0;
 
 export const getDemoJobsResponseScrapItemQuantityMin = 0;
+
+export const getDemoJobsResponseSheetWidthMmMin = 0;
+
+export const getDemoJobsResponseSheetLengthMmMin = 0;
+
+export const getDemoJobsResponsePendingReworkMin = 0;
 
 
 
@@ -632,9 +738,122 @@ export const GetDemoJobsResponseItem = zod.object({
   "at": zod.string(),
   "comment": zod.string(),
   "changes": zod.string()
-}))
+})),
+  "sheetWidthMm": zod.number().min(getDemoJobsResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(getDemoJobsResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(getDemoJobsResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
 })
 export const GetDemoJobsResponse = zod.array(GetDemoJobsResponseItem)
+
+
+export const ListAssigneesParams = zod.object({
+  "companyId": zod.coerce.string()
+})
+
+export const ListAssigneesResponseItem = zod.object({
+  "userId": zod.string(),
+  "name": zod.string(),
+  "role": zod.string()
+})
+export const ListAssigneesResponse = zod.array(ListAssigneesResponseItem)
+
+
+export const ResolveReworkParams = zod.object({
+  "companyId": zod.coerce.string(),
+  "jobId": zod.coerce.string()
+})
+
+export const resolveReworkBodyGoodMin = 0;
+
+export const resolveReworkBodyOffcutsMin = 0;
+
+export const resolveReworkBodyScrapItemQuantityMin = 0;
+
+
+
+
+export const ResolveReworkBody = zod.object({
+  "version": zod.number().int(),
+  "good": zod.number().min(resolveReworkBodyGoodMin),
+  "offcuts": zod.number().min(resolveReworkBodyOffcutsMin),
+  "scrap": zod.array(zod.object({
+  "reason": zod.string(),
+  "quantity": zod.number().min(resolveReworkBodyScrapItemQuantityMin).nullable()
+})),
+  "comment": zod.string().min(1)
+})
+
+export const resolveReworkResponseIssuedMin = 0;
+
+export const resolveReworkResponseGoodMin = 0;
+
+export const resolveReworkResponseOffcutsMin = 0;
+
+export const resolveReworkResponseScrapItemQuantityMin = 0;
+
+export const resolveReworkResponseSheetWidthMmMin = 0;
+
+export const resolveReworkResponseSheetLengthMmMin = 0;
+
+export const resolveReworkResponsePendingReworkMin = 0;
+
+
+
+export const ResolveReworkResponse = zod.object({
+  "id": zod.string(),
+  "companyId": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "material": zod.string(),
+  "machine": zod.string(),
+  "product": zod.string(),
+  "unit": zod.string(),
+  "instructions": zod.string(),
+  "issued": zod.number().min(resolveReworkResponseIssuedMin).nullable(),
+  "good": zod.number().min(resolveReworkResponseGoodMin).nullable(),
+  "offcuts": zod.number().min(resolveReworkResponseOffcutsMin).nullable(),
+  "scrap": zod.array(zod.object({
+  "reason": zod.string(),
+  "quantity": zod.number().min(resolveReworkResponseScrapItemQuantityMin).nullable()
+})),
+  "notes": zod.string(),
+  "plannedYield": zod.number().nullable(),
+  "unsupported": zod.boolean(),
+  "version": zod.number().int(),
+  "status": zod.enum(['draft', 'submitted', 'approved', 'returned']),
+  "createdBy": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "isSample": zod.boolean(),
+  "scrapTotal": zod.number(),
+  "difference": zod.number(),
+  "yieldRate": zod.number(),
+  "scrapRate": zod.number(),
+  "offcutRate": zod.number(),
+  "audit": zod.array(zod.object({
+  "id": zod.string(),
+  "actor": zod.string(),
+  "action": zod.string(),
+  "at": zod.string(),
+  "comment": zod.string(),
+  "changes": zod.string()
+})),
+  "sheetWidthMm": zod.number().min(resolveReworkResponseSheetWidthMmMin).nullish(),
+  "sheetLengthMm": zod.number().min(resolveReworkResponseSheetLengthMmMin).nullish(),
+  "assignedTo": zod.string().nullish(),
+  "offcutSizeNote": zod.string().optional(),
+  "offcutLocation": zod.string().optional(),
+  "pendingRework": zod.number().min(resolveReworkResponsePendingReworkMin).nullish(),
+  "assignedName": zod.string().optional(),
+  "recordingVersion": zod.number().int().optional(),
+  "reworkResolved": zod.number().optional()
+})
 
 
 /**

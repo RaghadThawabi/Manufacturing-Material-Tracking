@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCreateJob, useTransitionJob, getListJobsQueryKey, getGetSummaryQueryKey, type JobInput } from "@workspace/api-client-react";
+import { useAuth } from "@workspace/replit-auth-web";
+import { useListAssignees, getListAssigneesQueryKey, useCreateJob, useTransitionJob, getListJobsQueryKey, getGetSummaryQueryKey, type JobInput } from "@workspace/api-client-react";
 import { PageHeader } from "@/components/mf-ui";
 import { JobWizard } from "@/components/job-wizard";
-import { emptyJob, errMsg, useCompany } from "@/lib/mf";
+import { canReview, emptyJob, errMsg, useCompany } from "@/lib/mf";
 import { useToast } from "@/hooks/use-toast";
 
 export default function JobNew() {
@@ -16,6 +17,10 @@ export default function JobNew() {
   const transition = useTransitionJob();
   const [err, setErr] = useState("");
   const id = company!.id;
+  const { user } = useAuth();
+  const as = useListAssignees(id, { query: { queryKey: getListAssigneesQueryKey(id) } });
+  const reviewer = canReview(company!.role);
+  const assignees = (as.data ?? []).filter((a) => reviewer || a.userId === user?.id);
   const save = async (j: JobInput, submit: boolean) => {
     setErr("");
     try {
@@ -32,7 +37,8 @@ export default function JobNew() {
   return (
     <>
       <PageHeader eyebrow="New record" title="Record a job" />
-      <JobWizard company={company!} initial={emptyJob(company)} pending={create.isPending || transition.isPending} error={err} onSave={save} onCancel={() => nav("/jobs")} />
+      {as.isLoading ? <div className="h-64 animate-pulse rounded-md bg-muted" /> : <JobWizard company={company!} recordingVersion={2} assignees={assignees} assignMode={reviewer ? "any" : "self"}
+        initial={{ ...emptyJob(company), assignedTo: reviewer ? null : user?.id ?? null }} pending={create.isPending || transition.isPending} error={err} onSave={save} onCancel={() => nav("/jobs")} />}
     </>
   );
 }

@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, Plus, Trash2, Save, Send, Scale } from "lucide-react";
-import type { JobInput, Company } from "@workspace/api-client-react";
+import { ArrowLeft, ArrowRight, Check, Plus, Trash2, Save, Send, Scale, Lock } from "lucide-react";
+import type { JobInput, Company, Assignee } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChipPicker, QtyField, FlowBar, Legend, ErrorPanel } from "@/components/mf-ui";
-import { calc, fmt, pct, settingNames, submissionIssues } from "@/lib/mf";
+import { ChipPicker, QtyField, FlowBar, Legend, ErrorPanel, BalanceText } from "@/components/mf-ui";
+import { calc, fmt, pct, settingNames, submissionIssues, measurement } from "@/lib/mf";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Job details", "Material issued", "Outcomes", "Check & submit"];
@@ -15,14 +15,30 @@ function Field({ label, children, req }: { label: string; children: ReactNode; r
   return <div><p className="mb-2 text-sm font-bold uppercase tracking-wide">{label}{req && <span className="ml-1 text-destructive">*</span>}</p>{children}</div>;
 }
 
-export function JobWizard({ company, initial, pending, error, onSave, onCancel }: {
+function mmVal(t: string): number | null | undefined {
+  if (t === "") return null;
+  const n = Number(t.replace(",", "."));
+  return !Number.isNaN(n) && n >= 0 ? n : undefined;
+}
+
+export function JobWizard({ company, initial, pending, error, onSave, onCancel, recordingVersion = 2, outcomesLocked = false, assignees = [], assignMode = "any", assignedName }: {
   company: Company; initial: JobInput; pending: boolean; error: string; onSave: (j: JobInput, submit: boolean) => void; onCancel?: () => void;
+  recordingVersion?: number; outcomesLocked?: boolean; assignees?: Assignee[]; assignMode?: "any" | "self" | "locked"; assignedName?: string;
 }) {
   const [j, setJ] = useState<JobInput>(initial);
   const [step, setStep] = useState(0);
   const set = <K extends keyof JobInput>(k: K, v: JobInput[K]) => setJ((p) => ({ ...p, [k]: v }));
   const c = calc(j);
-  const issues = submissionIssues(j, company.tolerance);
+  const v2 = recordingVersion >= 2;
+  const issues = submissionIssues(j, company.tolerance, recordingVersion);
+  const m = measurement(j, recordingVersion);
+  const assigneeOpts = assignees.filter((a) => assignMode === "any" || a.userId === j.assignedTo || assignMode === "self");
+  const lockNote = outcomesLocked && (
+    <div data-testid="text-outcomes-locked" className="flex items-start gap-3 rounded-md border-2 border-pending bg-pending-soft p-4 text-sm">
+      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-pending" />
+      <span>Rework has already been resolved on this job, so issued and outcome quantities are locked to preserve the audit trail. Use <span className="font-semibold">Resolve rework</span> on the job page to move remaining pending quantity. Job details can still be edited.</span>
+    </div>
+  );
   const balanced = !!j.issued && Math.abs(c.difference) <= company.tolerance + 1e-8;
   const u = j.unit || "units";
   const reasons = settingNames(company, "reason");
@@ -50,23 +66,45 @@ export function JobWizard({ company, initial, pending, error, onSave, onCancel }
                 <Field label="Job number" req><Input data-testid="input-number" className="num h-12 text-lg" value={j.number} onChange={(e) => set("number", e.target.value)} placeholder="IK-204" /></Field>
                 <Field label="Date" req><Input data-testid="input-date" type="date" className="h-12 text-lg" value={j.date} onChange={(e) => set("date", e.target.value)} /></Field>
               </div>
-              <Field label="Material" req><ChipPicker testId="material" options={settingNames(company, "material")} value={j.material} onChange={(v) => set("material", v)} /></Field>
+              <fieldset disabled={outcomesLocked}><Field label="Material" req><ChipPicker testId="material" options={settingNames(company, "material")} value={j.material} onChange={(v) => set("material", v)} /></Field></fieldset>
               <Field label="Machine" req><ChipPicker testId="machine" options={settingNames(company, "machine")} value={j.machine} onChange={(v) => set("machine", v)} /></Field>
               <Field label="Product" req><ChipPicker testId="product" options={settingNames(company, "product")} value={j.product} onChange={(v) => set("product", v)} /></Field>
-              <Field label="Unit" req><ChipPicker testId="unit" options={settingNames(company, "unit")} value={j.unit} onChange={(v) => set("unit", v)} /></Field>
-              <Field label="Instructions (optional)"><Textarea data-testid="input-instructions" value={j.instructions} onChange={(e) => set("instructions", e.target.value)} placeholder="As written on the job card" /></Field>
+              <fieldset disabled={outcomesLocked}><Field label="Unit" req><ChipPicker testId="unit" options={settingNames(company, "unit")} value={j.unit} onChange={(v) => set("unit", v)} /></Field></fieldset>
+              <Field label="Assigned operator" req={v2}>
+                {assignMode === "locked" ? (
+                  <p data-testid="text-assigned" className="rounded-md border bg-muted/50 p-3 text-sm"><Lock className="mr-2 inline h-3.5 w-3.5" />{assignedName || "Unassigned"}<span className="ml-2 text-xs text-muted-foreground">Assignment can only be changed by a supervisor, manager or admin.</span></p>
+                ) : assigneeOpts.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {assigneeOpts.map((a) => (
+                      <button type="button" key={a.userId} data-testid={`chip-assignee-${a.userId}`} onClick={() => set("assignedTo", a.userId)}
+                        className={cn("min-h-12 rounded-md border-2 px-4 text-left text-sm font-semibold transition-all active:scale-[.97]", j.assignedTo === a.userId ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary/50")}>
+                        {a.name}<span className="ml-2 text-[10px] uppercase opacity-70">{a.role}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">No operators available to assign.</p>}
+              </Field>
+              <Field label="Sheet size (mm)" req={v2}>
+                <div className="flex items-center gap-2">
+                  <Input data-testid="input-sheet-width" inputMode="decimal" placeholder="Width" className="num h-12 max-w-36 text-lg" value={j.sheetWidthMm ?? ""} onChange={(e) => { const n = mmVal(e.target.value); if (n !== undefined) set("sheetWidthMm", n); }} />
+                  <span className="text-muted-foreground">x</span>
+                  <Input data-testid="input-sheet-length" inputMode="decimal" placeholder="Length" className="num h-12 max-w-36 text-lg" value={j.sheetLengthMm ?? ""} onChange={(e) => { const n = mmVal(e.target.value); if (n !== undefined) set("sheetLengthMm", n); }} />
+                </div>
+              </Field>
+              <Field label={v2 ? "Instructions" : "Instructions (optional)"} req={v2}><Textarea data-testid="input-instructions" value={j.instructions} onChange={(e) => set("instructions", e.target.value)} placeholder="As written on the job card" /></Field>
               <label className={cn("flex cursor-pointer items-start gap-3 rounded-md border-2 p-4", j.unsupported ? "border-destructive bg-destructive/5" : "border-dashed")}>
                 <Checkbox data-testid="checkbox-unsupported" className="mt-0.5 h-5 w-5" checked={j.unsupported} onCheckedChange={(v) => set("unsupported", v === true)} />
-                <span><span className="block font-semibold">This job involves rework, multiple stages or multiple materials</span>
-                  <span className="text-sm text-muted-foreground">Phase 1 records single-material, single-stage, single-unit jobs only. Ticking this blocks submission; you can still save a draft.</span></span>
+                <span><span className="block font-semibold">This job involves multiple stages or multiple materials</span>
+                  <span className="text-sm text-muted-foreground">Only single-material, single-stage, single-unit jobs can be recorded. Rework is supported: record it as pending rework in Outcomes. Ticking this blocks submission; you can still save a draft.</span></span>
               </label>
             </>
           )}
 
           {step === 1 && (
             <>
-              <QtyField testId="issued" label="Material issued" value={j.issued} onChange={(v) => set("issued", v)} unit={u} hint="Total quantity issued to this job. Must be greater than zero." />
-              <Field label="Planned yield % (optional)">
+              {lockNote}
+              <QtyField disabled={outcomesLocked} testId="issued" label="Material issued" value={j.issued} onChange={(v) => set("issued", v)} unit={u} hint="Total quantity issued to this job. Must be greater than zero." />
+              <Field label={v2 ? "Planned yield %" : "Planned yield % (optional)"} req={v2}>
                 <Input data-testid="input-planned-yield" inputMode="decimal" className="num h-12 max-w-40 text-lg" value={j.plannedYield ?? ""} placeholder="—"
                   onChange={(e) => { const t = e.target.value; if (t === "") return set("plannedYield", null); const n = Number(t); if (!Number.isNaN(n) && n >= 0 && n <= 100) set("plannedYield", n); }} />
               </Field>
@@ -75,7 +113,9 @@ export function JobWizard({ company, initial, pending, error, onSave, onCancel }
 
           {step === 2 && (
             <>
+              {lockNote}
               <p className="text-sm text-muted-foreground">Leave a field blank if it has not been measured yet. Blank is not zero — enter 0 when there truly was none.</p>
+              <fieldset disabled={outcomesLocked} className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <QtyField testId="good" tone="good" label="Good output" value={j.good} onChange={(v) => set("good", v)} unit={u} />
                 <QtyField testId="offcuts" tone="reuse" label="Reusable offcuts" value={j.offcuts} onChange={(v) => set("offcuts", v)} unit={u} />
@@ -95,13 +135,22 @@ export function JobWizard({ company, initial, pending, error, onSave, onCancel }
                   </div>
                 ))}
               </div>
+              <QtyField testId="pending-rework" tone="pending" label="Pending rework" value={j.pendingRework ?? null} onChange={(v) => set("pendingRework", v)} unit={u}
+                hint={v2 ? "Pieces set aside to be reworked, not yet good, offcut or scrap. Required: enter 0 if nothing is waiting." : "Optional on legacy records. Pieces set aside for rework."} />
+              </fieldset>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Offcut size (optional)"><Input data-testid="input-offcut-size" className="h-12" value={j.offcutSizeNote ?? ""} onChange={(e) => set("offcutSizeNote", e.target.value)} placeholder="e.g. 2 pcs 600 x 400" /></Field>
+                <Field label="Offcut storage (optional)"><Input data-testid="input-offcut-location" className="h-12" value={j.offcutLocation ?? ""} onChange={(e) => set("offcutLocation", e.target.value)} placeholder="e.g. Rack B3" /></Field>
+              </div>
             </>
           )}
 
           {step === 3 && (
             <>
               <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-                {[["Job", j.number], ["Date", j.date], ["Material", j.material], ["Machine", j.machine], ["Product", j.product], ["Unit", j.unit]].map(([k, v]) => (
+                {[["Job", j.number], ["Date", j.date], ["Material", j.material], ["Machine", j.machine], ["Product", j.product], ["Unit", j.unit],
+                  ["Assigned", assignees.find((a) => a.userId === j.assignedTo)?.name ?? (j.assignedTo ? assignedName ?? "" : "")],
+                  ["Sheet mm", j.sheetWidthMm && j.sheetLengthMm ? `${fmt(j.sheetWidthMm)} x ${fmt(j.sheetLengthMm)}` : ""]].map(([k, v]) => (
                   <div key={k} className="rounded-md bg-muted/60 p-3"><p className="text-xs uppercase text-muted-foreground">{k}</p><p className="font-semibold">{v || <span className="text-destructive">Missing</span>}</p></div>
                 ))}
               </div>
@@ -138,13 +187,15 @@ export function JobWizard({ company, initial, pending, error, onSave, onCancel }
             <p data-testid="text-residual" className={cn("num text-4xl font-semibold", !j.issued ? "" : balanced ? "text-good" : "text-destructive")}>{j.issued ? fmt(c.difference, 3) : "—"}</p>
             <p className="text-xs">{u}{company.tolerance > 0 && ` · tolerance ±${company.tolerance}`}</p>
           </div>
-          <FlowBar className="mt-4 h-4" issued={j.issued ?? 0} good={j.good ?? 0} scrap={c.scrapTotal} offcuts={j.offcuts ?? 0} />
+          <FlowBar className="mt-4 h-4" issued={j.issued ?? 0} good={j.good ?? 0} scrap={c.scrapTotal} offcuts={j.offcuts ?? 0} pending={c.pendingRework} />
           <div className="mt-3"><Legend /></div>
+          <div className="mt-3 border-t pt-3"><BalanceText issued={j.issued} accounted={c.accounted} unit={u} tolerance={company.tolerance} measured={m.measured} total={m.total} missing={m.missing} /></div>
           <dl className="num mt-4 space-y-2 text-sm">
             <div className="flex justify-between"><dt>Issued</dt><dd>{fmt(j.issued)}</dd></div>
             <div className="flex justify-between text-good"><dt>Good</dt><dd>{fmt(j.good)} · {pct(c.yieldRate)}</dd></div>
             <div className="flex justify-between text-reuse"><dt>Reusable</dt><dd>{fmt(j.offcuts)} · {pct(c.offcutRate)}</dd></div>
             <div className="flex justify-between text-waste"><dt>Scrap</dt><dd>{fmt(c.scrapTotal)} · {pct(c.scrapRate)}</dd></div>
+            <div className="flex justify-between text-pending"><dt>Pending rework</dt><dd>{fmt(j.pendingRework)} · {pct(c.pendingRate)}</dd></div>
             {j.plannedYield != null && <div className="flex justify-between border-t pt-2"><dt>Planned yield</dt><dd>{pct(j.plannedYield)} ({c.yieldRate - j.plannedYield >= 0 ? "+" : ""}{(c.yieldRate - j.plannedYield).toFixed(1)})</dd></div>}
           </dl>
         </div>

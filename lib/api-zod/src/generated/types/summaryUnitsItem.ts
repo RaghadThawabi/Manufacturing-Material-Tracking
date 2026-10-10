@@ -12,4 +12,5 @@ export type SummaryUnitsItem = {
   scrap: number;
   offcuts: number;
   yieldRate: number;
+  pendingRework?: number;
 };

@@ -50,4 +50,26 @@ export interface Job {
   scrapRate: number;
   offcutRate: number;
   audit: Audit[];
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetWidthMm?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  sheetLengthMm?: number | null;
+  /** @nullable */
+  assignedTo?: string | null;
+  offcutSizeNote?: string;
+  offcutLocation?: string;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  pendingRework?: number | null;
+  assignedName?: string;
+  recordingVersion?: number;
+  reworkResolved?: number;
 }
