@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "MaterialFlow"
+description = "Configurable cutting job material reconciliation and supervisor review for manufacturing companies."
+version = "1.0.0"
+id = "artifacts/material-flow"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24954
+
+[services.development]
+run = "pnpm --filter @workspace/material-flow run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/material-flow", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/material-flow/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24954"
+BASE_PATH = "/"

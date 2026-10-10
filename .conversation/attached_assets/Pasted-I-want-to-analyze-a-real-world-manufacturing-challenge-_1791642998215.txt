@@ -1,0 +1,78 @@
+I want to analyze a real-world manufacturing challenge before deciding how to build the solution. Please do not start coding yet.
+
+## Challenge: Ibn Khaldoun Printing and Publishing — Waste Analysis in a Cutting Job
+
+### 1. Business problem
+
+A printing and carton manufacturing company wants to understand material losses during cutting operations. The company needs to distinguish between:
+
+* Good finished products.
+* Actual waste or scrap, categorized by reason.
+* Reusable leftover pieces (offcuts).
+
+The goal is to understand where the material goes, identify unusual waste, and help supervisors investigate possible causes such as machine setup, cutting layout, or damaged material.
+
+### 2. Example data provided in the challenge
+
+Job IK-202:
+
+* Material issued: 1,200 kg
+* Good output: 900 kg
+* Setup/layout scrap: 180 kg
+* Damaged material scrap: 60 kg
+* Reusable offcuts: 60 kg
+* Total: 1,200 kg
+* Good yield: 75%
+* Actual scrap rate: 20%
+
+Job IK-203:
+
+* Material issued: 1,000 kg
+* Good output: 820 kg
+* Scrap: 100 kg
+* Reusable offcuts: 80 kg
+* Total: 1,000 kg
+* Good yield: 82%
+* Actual scrap rate: 10%
+
+Both jobs were processed on machine CT-2. Each job may also have a product specification, sheet size, planned yield, and cutting instructions.
+
+Reusable offcuts must not be counted as actual scrap. The system must validate that the issued material equals good output + actual scrap + reusable offcuts, while handling rework or unexplained differences explicitly if necessary.
+
+### 3. Expected workflow
+
+1. An operator opens a digital job card.
+2. The operator selects or records the material, machine, product, cutting instructions, and issued quantity.
+3. When the job finishes, the operator records good output, scrap quantities by reason, and reusable offcuts. Rework should be recorded separately if applicable.
+4. The system validates the quantities and identifies any imbalance before the job can be closed.
+5. The system calculates good yield, scrap rate, and reusable-offcut rate.
+6. A supervisor or manager compares jobs and reviews which scrap categories contributed most to the losses.
+7. The results support investigation and improvement; the system must not claim a root cause without evidence.
+
+### 4. Users
+
+* Cutting operator: records job data and results.
+* Production supervisor: reviews and validates job records and investigates abnormal results.
+* Manager: compares jobs, reviews reports, and decides on improvements.
+
+### 5. Business and scalability requirement
+
+This should not be a one-off application hardcoded for Ibn Khaldoun. It should solve the initial company's problem while being configurable for other printing, carton, packaging, or related manufacturing companies in the future.
+
+Consider how each company could configure its own materials, units of measurement, machines, product types, scrap categories, users, and reports. Do not assume that every company uses kilograms or the same production process.
+
+### 6. What I want you to do first
+
+Before writing code:
+
+1. Explain the business problem in simple terms and identify the core requirements versus optional features.
+2. Propose two or three possible solutions, compare their advantages and disadvantages, and recommend the smallest practical MVP.
+3. Identify missing requirements and important questions I should ask the challenge organizers or factory.
+4. Explain the data model and the end-to-end workflow.
+5. Identify edge cases, including unbalanced quantities, missing data, rework, reusable offcuts, different units, and different machines or materials.
+6. Explain how the solution could be adapted to a second company without rebuilding the application.
+7. Suggest a realistic way to test the solution with the two sample jobs above.
+8. Discuss possible business models and customer types without assuming market demand or pricing has already been validated.
+9. Let’s brainstorm solutions for integrating AI into the product. One idea I’ve considered is an interface where we upload the design to be cut, and the AI then suggests how to arrange it on the sheet to minimize waste.
+
+Keep the solution practical and focused on the real factory workflow. Clearly separate facts given in the challenge from assumptions and proposed features. Wait for my approval before generating the application code.
