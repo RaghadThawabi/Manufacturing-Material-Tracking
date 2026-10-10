@@ -12,7 +12,7 @@ const schemas = {
  CompanyInput:obj({name:{type:'string',minLength:1},unit:{type:'string',enum:['kg','sheets','m']},loadSamples:{type:'boolean'}},['name','unit']),
  CompanyUpdate:obj({name:{type:'string',minLength:1},tolerance:{type:'number',minimum:0}},['name','tolerance']),
  Member:obj({id:str,userId:{type:['string','null']},name:str,role:str,inviteCode:{type:['string','null']}}),
- MemberInput:obj({name:{type:'string',minLength:1},role:{type:'string',enum:['operator','supervisor','admin']}}),
+ MemberInput:obj({name:{type:'string',minLength:1},role:{type:'string',enum:['operator','supervisor','manager','admin']}}),
  JoinInput:obj({code:{type:'string',minLength:1}}),
  Scrap:obj({reason:str,quantity:num}),
  JobInput:obj({number:{type:'string',minLength:1},date:str,material:str,machine:str,product:str,unit:str,instructions:str,issued:num,good:num,offcuts:num,scrap:arr('Scrap'),notes:str,plannedYield:{type:['number','null'],minimum:0,maximum:100},unsupported:{type:'boolean'},version:{type:'integer'}},['number','date','material','machine','product','unit','instructions','issued','good','offcuts','scrap','notes','unsupported']),

@@ -987,6 +987,7 @@
             "enum": [
               "operator",
               "supervisor",
+              "manager",
               "admin"
             ]
           }

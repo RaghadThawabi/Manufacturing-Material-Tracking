@@ -86,6 +86,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
       <div className="border-t border-sidebar-border p-4">
         <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">{[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || "Signed in"}</p>
+        <p className="break-all text-xs text-sidebar-foreground/70">{user?.email}</p>
+        <p className="mt-1 text-xs capitalize text-sidebar-foreground/70">Role: {company.role}</p>
         <button data-testid="button-logout" onClick={isAuthenticated ? logout : login} className="mt-2 flex items-center gap-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-primary">
           {isAuthenticated ? <><LogOut className="h-4 w-4" />Log out</> : <><LogIn className="h-4 w-4" />Log in</>}
         </button>

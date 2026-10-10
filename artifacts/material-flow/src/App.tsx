@@ -33,6 +33,7 @@ function LoginWall() {
       <div className="rise w-full max-w-md rounded-md border-2 border-foreground bg-card p-8">
         <Logo /><h1 className="mt-6 text-2xl font-extrabold">Log in to continue</h1>
         <p className="mt-2 text-sm text-muted-foreground">This area holds company job records and is only available to team members.</p>
+        <p className="mt-3 text-sm text-muted-foreground">Use your own account, not the administrator's. After sign-in, your invitation will assign the company role chosen by your admin.</p>
         <Button onClick={login} size="lg" className="mt-6 h-12 w-full" data-testid="button-login"><LogIn />Log in</Button>
       </div>
     </div>

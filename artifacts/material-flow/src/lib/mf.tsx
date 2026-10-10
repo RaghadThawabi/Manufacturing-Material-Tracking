@@ -53,19 +53,19 @@ type Ctx = { companies: Company[]; company: Company | null; setCompanyId: (id: s
 const CompanyCtx = createContext<Ctx>({ companies: [], company: null, setCompanyId: () => {}, loading: false, error: null, refetch: () => {} });
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  const q = useListCompanies({ query: { enabled: isAuthenticated, queryKey: getListCompaniesQueryKey() } });
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const q = useListCompanies({ query: { enabled: isAuthenticated, queryKey: getListCompaniesQueryKey(), refetchInterval: 15000, staleTime: 0 } });
   const [id, setId] = useState<string | null>(() => localStorage.getItem("mf.company"));
   const companies = useMemo(() => q.data ?? [], [q.data]);
   const company = companies.find((c) => c.id === id) ?? companies[0] ?? null;
   useEffect(() => { if (company && company.id !== id) setId(company.id); }, [company, id]);
   const setCompanyId = (v: string) => { localStorage.setItem("mf.company", v); setId(v); };
   return (
-    <CompanyCtx.Provider value={{ companies, company, setCompanyId, loading: isAuthenticated && q.isLoading, error: q.error, refetch: () => q.refetch() }}>
+    <CompanyCtx.Provider value={{ companies, company, setCompanyId, loading: authLoading || (isAuthenticated && q.isLoading), error: q.error, refetch: () => q.refetch() }}>
       {children}
     </CompanyCtx.Provider>
   );
 }
 export const useCompany = () => useContext(CompanyCtx);
-export const canReview = (role?: string) => role === "admin" || role === "supervisor";
+export const canReview = (role?: string) => role === "admin" || role === "manager" || role === "supervisor";
 export const settingNames = (c: Company | null, kind: string) => (c?.settings ?? []).filter((s) => s.kind === kind && s.active).map((s) => s.name);

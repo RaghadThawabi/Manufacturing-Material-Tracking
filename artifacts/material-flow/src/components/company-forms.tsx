@@ -54,7 +54,7 @@ export function CreateCompanyForm({ onDone }: { onDone?: () => void }) {
 }
 
 export function JoinCompanyForm({ onDone }: { onDone?: () => void }) {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(() => new URLSearchParams(window.location.search).get("invite") || "");
   const join = useJoinCompany();
   const qc = useQueryClient();
   const { setCompanyId } = useCompany();
@@ -64,7 +64,8 @@ export function JoinCompanyForm({ onDone }: { onDone?: () => void }) {
       onSuccess: async (c) => {
         await qc.invalidateQueries({ queryKey: getListCompaniesQueryKey() });
         setCompanyId(c.id);
-        toast({ title: "Joined", description: `You are now a member of ${c.name}.` });
+        window.history.replaceState(null, "", window.location.pathname);
+        toast({ title: "Joined", description: `You joined ${c.name} as ${c.role}.` });
         onDone?.();
       },
     });
@@ -72,8 +73,8 @@ export function JoinCompanyForm({ onDone }: { onDone?: () => void }) {
     <div className="space-y-5">
       <div>
         <label className="text-sm font-bold uppercase tracking-wide">Invite code</label>
-        <Input data-testid="input-invite-code" className="num mt-2 h-16 text-center text-2xl tracking-[0.3em] uppercase" value={code} onChange={(e) => setCode(e.target.value)} placeholder="CODE" />
-        <p className="mt-2 text-sm text-muted-foreground">Your admin shares this code with you directly.</p>
+        <Input data-testid="input-invite-code" className="num mt-2 h-12 text-sm" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Paste the code shared by your admin" autoCapitalize="none" spellCheck={false} />
+        <p className="mt-2 text-sm text-muted-foreground">Your admin shares a private, single-use link or code. Sign in with your own account before joining. Your role is already assigned by the admin.</p>
       </div>
       <ErrorPanel message={errMsg(join.error)} />
       <Button data-testid="button-join-company" size="lg" className="h-14 w-full text-base" disabled={!code.trim() || join.isPending} onClick={submit}>

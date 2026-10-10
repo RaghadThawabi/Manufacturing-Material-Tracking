@@ -91,6 +91,7 @@ export type MemberInputRole = typeof MemberInputRole[keyof typeof MemberInputRol
 export const MemberInputRole = {
   operator: 'operator',
   supervisor: 'supervisor',
+  manager: 'manager',
   admin: 'admin',
 } as const;
 

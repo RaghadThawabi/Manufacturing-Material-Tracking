@@ -165,7 +165,7 @@ export const InviteMemberParams = zod.object({
 
 export const InviteMemberBody = zod.object({
   "name": zod.string().min(1),
-  "role": zod.enum(['operator', 'supervisor', 'admin'])
+  "role": zod.enum(['operator', 'supervisor', 'manager', 'admin'])
 })
 
 export const InviteMemberResponse = zod.object({
@@ -187,7 +187,7 @@ export const UpdateMemberParams = zod.object({
 
 export const UpdateMemberBody = zod.object({
   "name": zod.string().min(1),
-  "role": zod.enum(['operator', 'supervisor', 'admin'])
+  "role": zod.enum(['operator', 'supervisor', 'manager', 'admin'])
 })
 
 export const UpdateMemberResponse = zod.object({

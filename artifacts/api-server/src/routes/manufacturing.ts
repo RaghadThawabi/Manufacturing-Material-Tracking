@@ -47,7 +47,7 @@ r.post("/companies/join",async(q,s)=>{
  const [inv]=await db.select().from(membersTable).where(eq(membersTable.inviteCode,b.code.trim()));
  if(!inv||inv.userId)throw fail(400,"Invitation is invalid or already used.");
  const [existing]=await db.select().from(membersTable).where(and(eq(membersTable.companyId,inv.companyId),eq(membersTable.userId,q.user!.id)));
- if(existing)throw fail(409,"You already belong to this workspace.");
+ if(existing)throw fail(409,`You are already a ${existing.role} in this workspace. This invitation is for another person. Sign out and use that person's own account; invitations do not switch your role.`);
  const [joined]=await db.update(membersTable).set({userId:q.user!.id,inviteCode:null}).where(and(eq(membersTable.id,inv.id),eq(membersTable.inviteCode,b.code.trim()))).returning();
  if(!joined)throw fail(409,"Invitation was already used.");
  s.json(out(V.JoinCompanyResponse,companyView(await company(inv.companyId),inv.role)));
@@ -80,6 +80,7 @@ r.get("/companies/:companyId/members",async(q,s)=>{
 });
 r.post("/companies/:companyId/members",async(q,s)=>{
  await member(q,["admin"]);const b=parse(V.InviteMemberBody,q.body);
+ if(!b.name.trim())throw fail(400,"Enter the team member's name.");
  const [m]=await db.insert(membersTable).values({id:randomUUID(),companyId:String(q.params.companyId),name:b.name.trim(),role:b.role,inviteCode:randomBytes(24).toString("hex")}).returning();
  s.json(out(V.InviteMemberResponse,m));
 });
@@ -119,7 +120,7 @@ async function changeJob(q:any,action:boolean){
  if(b.version!==old.version)throw fail(409,"This job changed. Reload before saving.");
  let next:any;
  if(action){
-  const {action:a}=b;const supervisor=["admin","supervisor"].includes(m.role);
+  const {action:a}=b;const supervisor=["admin","manager","supervisor"].includes(m.role);
   if(["approve","return","reopen"].includes(a)&&!supervisor)throw fail(403,"Supervisor permission is required.");
   if(a==="submit"){
    if(!["draft","returned"].includes(old.status))throw fail(409,"Only draft or returned jobs can be submitted.");
