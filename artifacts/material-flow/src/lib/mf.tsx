@@ -93,3 +93,32 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 export const useCompany = () => useContext(CompanyCtx);
 export const canReview = (role?: string) => role === "admin" || role === "manager" || role === "supervisor";
 export const settingNames = (c: Company | null, kind: string) => (c?.settings ?? []).filter((s) => s.kind === kind && s.active).map((s) => s.name);
+
+/* ---------- Phase 3: review flags ---------- */
+export type ReviewFlag = { key: "rework" | "yield" | "balance" | "resubmitted"; label: string; detail: string; weight: number };
+
+export function reviewFlags(j: Job, tolerance: number): ReviewFlag[] {
+  const out: ReviewFlag[] = [];
+  const pr = j.pendingRework ?? 0;
+  if (pr > 0) out.push({ key: "rework", label: "Pending rework", detail: `${fmt(pr, 3)} ${j.unit} set aside, not yet good, offcut or scrap`, weight: 3 });
+  if (j.plannedYield != null && j.yieldRate < j.plannedYield) out.push({ key: "yield", label: "Below planned yield", detail: `${pct(j.yieldRate)} vs plan ${pct(j.plannedYield)} (${(j.yieldRate - j.plannedYield).toFixed(1)} pts)`, weight: 2 });
+  if (Math.abs(j.difference) > tolerance + 1e-8) out.push({ key: "balance", label: "Outside tolerance", detail: `Residual ${fmt(j.difference, 3)} ${j.unit} vs tolerance ±${fmt(tolerance, 3)}`, weight: 4 });
+  if (j.audit.some((a) => isReturnish(a.action, a.toStatus))) out.push({ key: "resubmitted", label: "Resubmitted", detail: "Previously returned or reopened", weight: 1 });
+  return out;
+}
+/** Approval needs a written comment when rework is pending or yield is below plan. */
+export const approvalNeedsComment = (j: Job) => (j.pendingRework ?? 0) > 0 || (j.plannedYield != null && j.yieldRate < j.plannedYield);
+
+export function isReturnish(action: string, toStatus?: string) {
+  const a = action.toLowerCase();
+  return a.startsWith("return") || a.startsWith("reopen") || (toStatus === "returned" && !a.startsWith("submit"));
+}
+export function latestReturn(j: Job) {
+  return [...j.audit].reverse().find((a) => isReturnish(a.action, a.toStatus)) ?? null;
+}
+export const ago = (iso: string) => {
+  const m = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 60) return `${Math.round(m)}m`;
+  if (m < 60 * 24) return `${Math.round(m / 60)}h`;
+  return `${Math.round(m / 1440)}d`;
+};

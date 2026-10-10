@@ -59,4 +59,5 @@ export interface JobInput {
      * @nullable
      */
   pendingRework?: number | null;
+  changeReason?: string;
 }

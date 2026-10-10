@@ -75,6 +75,34 @@ export interface CompanyUpdate {
   tolerance: number;
 }
 
+export interface ReviewChecklist {
+  specifications: boolean;
+  quantities: boolean;
+  scrapReasons: boolean;
+}
+
+export type AuditFieldChangesItem = {
+  field: string;
+  before: string;
+  after: string;
+};
+
+export interface Audit {
+  id: string;
+  actor: string;
+  action: string;
+  at: string;
+  comment: string;
+  changes: string;
+  actorId?: string;
+  actorRole?: string;
+  version?: number;
+  fromStatus?: string;
+  toStatus?: string;
+  fieldChanges?: AuditFieldChangesItem[];
+  checklist?: ReviewChecklist;
+}
+
 export interface Member {
   id: string;
   /** @nullable */
@@ -83,6 +111,11 @@ export interface Member {
   role: string;
   /** @nullable */
   inviteCode: string | null;
+  active?: boolean;
+  version?: number;
+  /** @nullable */
+  inviteExpiresAt?: string | null;
+  history?: Audit[];
 }
 
 export type MemberInputRole = typeof MemberInputRole[keyof typeof MemberInputRole];
@@ -168,15 +201,7 @@ export interface JobInput {
      * @nullable
      */
   pendingRework?: number | null;
-}
-
-export interface Audit {
-  id: string;
-  actor: string;
-  action: string;
-  at: string;
-  comment: string;
-  changes: string;
+  changeReason?: string;
 }
 
 export type JobStatus = typeof JobStatus[keyof typeof JobStatus];
@@ -269,6 +294,7 @@ export interface ActionInput {
   action: ActionInputAction;
   comment?: string;
   version: number;
+  checklist?: ReviewChecklist;
 }
 
 export type SummaryUnitsItem = {
@@ -309,6 +335,42 @@ export interface ReworkInput {
   /** @minimum 0 */
   offcuts: number;
   scrap: Scrap[];
+  /** @minLength 1 */
+  comment: string;
+}
+
+export type MemberUpdateRole = typeof MemberUpdateRole[keyof typeof MemberUpdateRole];
+
+
+export const MemberUpdateRole = {
+  operator: 'operator',
+  supervisor: 'supervisor',
+  manager: 'manager',
+  admin: 'admin',
+} as const;
+
+export interface MemberUpdate {
+  /** @minLength 1 */
+  name: string;
+  role: MemberUpdateRole;
+  version: number;
+  /** @minLength 1 */
+  comment: string;
+}
+
+export type MemberActionAction = typeof MemberActionAction[keyof typeof MemberActionAction];
+
+
+export const MemberActionAction = {
+  rotateInvite: 'rotateInvite',
+  revokeInvite: 'revokeInvite',
+  suspend: 'suspend',
+  restore: 'restore',
+} as const;
+
+export interface MemberAction {
+  action: MemberActionAction;
+  version: number;
   /** @minLength 1 */
   comment: string;
 }

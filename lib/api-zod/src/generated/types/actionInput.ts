@@ -5,9 +5,11 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ActionInputAction } from './actionInputAction';
+import type { ReviewChecklist } from './reviewChecklist';
 
 export interface ActionInput {
   action: ActionInputAction;
   comment?: string;
   version: number;
+  checklist?: ReviewChecklist;
 }

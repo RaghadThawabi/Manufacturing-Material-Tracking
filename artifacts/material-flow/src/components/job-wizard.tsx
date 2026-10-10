@@ -21,9 +21,9 @@ function mmVal(t: string): number | null | undefined {
   return !Number.isNaN(n) && n >= 0 ? n : undefined;
 }
 
-export function JobWizard({ company, initial, pending, error, onSave, onCancel, recordingVersion = 2, outcomesLocked = false, assignees = [], assignMode = "any", assignedName }: {
+export function JobWizard({ company, initial, pending, error, onSave, onCancel, recordingVersion = 2, outcomesLocked = false, assignees = [], assignMode = "any", assignedName, requireChangeReason = false }: {
   company: Company; initial: JobInput; pending: boolean; error: string; onSave: (j: JobInput, submit: boolean) => void; onCancel?: () => void;
-  recordingVersion?: number; outcomesLocked?: boolean; assignees?: Assignee[]; assignMode?: "any" | "self" | "locked"; assignedName?: string;
+  recordingVersion?: number; outcomesLocked?: boolean; assignees?: Assignee[]; assignMode?: "any" | "self" | "locked"; assignedName?: string; requireChangeReason?: boolean;
 }) {
   const [j, setJ] = useState<JobInput>(initial);
   const [step, setStep] = useState(0);
@@ -42,6 +42,8 @@ export function JobWizard({ company, initial, pending, error, onSave, onCancel, 
   const balanced = !!j.issued && Math.abs(c.difference) <= company.tolerance + 1e-8;
   const u = j.unit || "units";
   const reasons = settingNames(company, "reason");
+  const reasonMissing = requireChangeReason && !(j.changeReason ?? "").trim();
+  const out = (): JobInput => (requireChangeReason ? { ...j, changeReason: (j.changeReason ?? "").trim() } : { ...j, changeReason: undefined });
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -166,15 +168,22 @@ export function JobWizard({ company, initial, pending, error, onSave, onCancel, 
             </>
           )}
 
+          {requireChangeReason && (
+            <div className="rounded-md border-2 border-waste/60 bg-waste/5 p-4">
+              <label htmlFor="change-reason" className="text-sm font-bold uppercase tracking-wide">What did you correct?<span className="ml-1 text-destructive">*</span></label>
+              <p className="mb-2 text-xs text-muted-foreground">This job was returned. Explain the correction you made so the reviewer can check it. Required to save. Not for general notes.</p>
+              <Textarea id="change-reason" data-testid="input-change-reason" value={j.changeReason ?? ""} onChange={(e) => set("changeReason", e.target.value)} placeholder="e.g. Re-weighed scrap bin 2, corrected from 4.2 to 3.6 kg" />
+            </div>
+          )}
           <ErrorPanel message={error} />
           <div className="flex flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-between">
             <div className="flex gap-2">
               {step > 0 ? <Button variant="outline" size="lg" className="h-12" onClick={() => setStep(step - 1)} data-testid="button-back"><ArrowLeft />Back</Button>
                 : onCancel && <Button variant="ghost" size="lg" className="h-12" onClick={onCancel} data-testid="button-cancel">Cancel</Button>}
-              <Button variant="outline" size="lg" className="h-12" disabled={pending || !j.number.trim()} onClick={() => onSave(j, false)} data-testid="button-save-draft"><Save />Save draft</Button>
+              <Button variant="outline" size="lg" className="h-12" disabled={pending || !j.number.trim() || reasonMissing} onClick={() => onSave(out(), false)} data-testid="button-save-draft"><Save />Save draft</Button>
             </div>
             {step < 3 ? <Button size="lg" className="h-12 px-8" onClick={() => setStep(step + 1)} data-testid="button-next">Next<ArrowRight /></Button>
-              : <Button size="lg" className="h-12 bg-good px-8 text-white hover:bg-good/90" disabled={pending || issues.length > 0} onClick={() => onSave(j, true)} data-testid="button-submit">{pending ? "Saving…" : <><Send />Submit for review</>}</Button>}
+              : <Button size="lg" className="h-12 bg-good px-8 text-white hover:bg-good/90" disabled={pending || issues.length > 0 || reasonMissing} onClick={() => onSave(out(), true)} data-testid="button-submit">{pending ? "Saving…" : <><Send />Submit for review</>}</Button>}
           </div>
         </div>
       </div>

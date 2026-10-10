@@ -4,6 +4,8 @@
  * Api
  * OpenAPI spec version: 1.0.0
  */
+import type { AuditFieldChangesItem } from './auditFieldChangesItem';
+import type { ReviewChecklist } from './reviewChecklist';
 
 export interface Audit {
   id: string;
@@ -12,4 +14,11 @@ export interface Audit {
   at: string;
   comment: string;
   changes: string;
+  actorId?: string;
+  actorRole?: string;
+  version?: number;
+  fromStatus?: string;
+  toStatus?: string;
+  fieldChanges?: AuditFieldChangesItem[];
+  checklist?: ReviewChecklist;
 }

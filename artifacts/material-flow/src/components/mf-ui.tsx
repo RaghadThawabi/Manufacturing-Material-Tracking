@@ -249,22 +249,72 @@ export function JobRow({ job, href }: { job: Job; href?: string }) {
   return href ? <Link href={href} data-testid={`row-job-${job.id}`} className={cn(cls, "transition-colors hover:bg-muted/50")}>{inner}</Link> : <div data-testid={`row-job-${job.id}`} className={cls}>{inner}</div>;
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  number: "Job number", date: "Date", material: "Material", machine: "Machine", product: "Product", unit: "Unit", instructions: "Instructions",
+  issued: "Issued", good: "Good output", offcuts: "Reusable offcuts", scrap: "Scrap entries", notes: "Notes", plannedYield: "Planned yield %",
+  unsupported: "Multi-stage flag", sheetWidthMm: "Sheet width (mm)", sheetLengthMm: "Sheet length (mm)", assignedTo: "Assigned operator",
+  offcutSizeNote: "Offcut size", offcutLocation: "Offcut storage", pendingRework: "Pending rework", name: "Name", role: "Role", active: "Access",
+  inviteCode: "Invite code", inviteExpiresAt: "Invite expiry", status: "Status",
+};
+const STATUS_WORD: Record<string, string> = { draft: "Draft", submitted: "Pending review", approved: "Approved", returned: "Returned" };
+const fieldLabel = (f: string) => FIELD_LABELS[f] ?? f.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+function showVal(v: string) {
+  if (v === "" || v === "null" || v === "undefined") return <span className="italic text-muted-foreground">blank</span>;
+  if (v === "true") return "Yes";
+  if (v === "false") return "No";
+  if (/^\d{4}-\d{2}-\d{2}T/.test(v)) return new Date(v).toLocaleString();
+  try {
+    const p = JSON.parse(v);
+    if (Array.isArray(p)) return p.map((x) => (x && typeof x === "object" ? `${x.reason || "—"}: ${x.quantity ?? "not measured"}` : String(x))).join(" · ") || "none";
+  } catch { /* plain string */ }
+  return v;
+}
+const actionTone = (a: string) => (a.startsWith("approv") ? "bg-good" : a.startsWith("return") || a.startsWith("reopen") || a.startsWith("revok") || a.startsWith("suspend") ? "bg-waste" : a.startsWith("submit") ? "bg-reuse" : "bg-primary");
+
 export function AuditTrail({ audit }: { audit: Audit[] }) {
   if (!audit.length) return <p className="text-sm text-muted-foreground">No audit entries.</p>;
   return (
     <ol className="relative space-y-5 border-l-2 border-border pl-5">
-      {[...audit].reverse().map((a) => (
-        <li key={a.id} className="relative" data-testid={`audit-${a.id}`}>
-          <span className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-background bg-primary" />
-          <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="font-semibold capitalize">{a.action}</span>
-            <span className="text-sm">by {a.actor}</span>
-            <span className="num text-xs text-muted-foreground">{new Date(a.at).toLocaleString()}</span>
-          </div>
-          {a.comment && <p className="mt-1 rounded-sm bg-muted px-3 py-2 text-sm">“{a.comment}”</p>}
-          {a.changes && <p className="num mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{a.changes}</p>}
-        </li>
-      ))}
+      {[...audit].reverse().map((a) => {
+        const act = a.action.toLowerCase();
+        const cl = a.checklist;
+        return (
+          <li key={a.id} className="relative" data-testid={`audit-${a.id}`}>
+            <span className={cn("absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-background", actionTone(act))} />
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span className="font-semibold capitalize">{a.action.replace(/([A-Z])/g, " $1")}</span>
+              <span className="text-sm">by {a.actor || "Unknown"}</span>
+              {a.actorRole && <span className="rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">{a.actorRole}</span>}
+              {a.version != null && <span className="num text-[11px] text-muted-foreground">v{a.version}</span>}
+              <span className="num text-xs text-muted-foreground">{new Date(a.at).toLocaleString()}</span>
+            </div>
+            {(a.fromStatus || a.toStatus) && a.fromStatus !== a.toStatus && (
+              <p className="mt-1 text-xs text-muted-foreground">{STATUS_WORD[a.fromStatus ?? ""] ?? a.fromStatus ?? "—"} <span aria-hidden>→</span> <span className="font-semibold text-foreground">{STATUS_WORD[a.toStatus ?? ""] ?? a.toStatus}</span></p>
+            )}
+            {a.comment && <p className="mt-1.5 rounded-sm border-l-2 border-foreground/30 bg-muted px-3 py-2 text-sm">“{a.comment}”</p>}
+            {cl && (
+              <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
+                {([["specifications", "Specifications"], ["quantities", "Quantities"], ["scrapReasons", "Scrap reasons"]] as const).map(([k, l]) => (
+                  <span key={k} className={cn("rounded-sm border px-1.5 py-0.5 font-semibold", cl[k] ? "border-good text-good" : "border-border text-muted-foreground line-through")}>{cl[k] ? "Checked" : "Not checked"}: {l}</span>
+                ))}
+              </div>
+            )}
+            {a.fieldChanges && a.fieldChanges.length > 0 ? (
+              <table className="mt-2 w-full max-w-xl text-xs">
+                <tbody>
+                  {a.fieldChanges.map((c, i) => (
+                    <tr key={i} className="border-b border-dashed last:border-0 align-top">
+                      <td className="py-1 pr-3 font-semibold">{fieldLabel(c.field)}</td>
+                      <td className="num py-1 pr-2 text-muted-foreground line-through decoration-waste/60">{showVal(c.before)}</td>
+                      <td className="num py-1">{showVal(c.after)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : a.changes ? <p className="num mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{a.changes}</p> : null}
+          </li>
+        );
+      })}
     </ol>
   );
 }

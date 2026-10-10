@@ -35,6 +35,7 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 ## User preferences
 
 - Phase 1 covers company setup, settings, roles, single-stage cutting jobs, reconciliation, review, and basic results. Phase 2 is approved: job specifications, operator assignment, pending rework and controlled resolution, and optional offcut size/location notes. AI, cutting optimization, conversions, and full offcut inventory remain later scope.
+- Phase 3 covers supervisor approval checks, review attention flags, traceable corrections, and Admin-managed invitation/access lifecycles. Preserve existing sign-in, historical jobs, and read-only company configuration for non-Admins.
 - Operator screens must be simple for nontechnical factory workers: large buttons, clear labels, stepwise forms, minimal typing, and explicit outcome indicators. Supervisor screens should offer polished, professional comparisons.
 - Other businesses must configure their settings and start jobs without application code changes.
 

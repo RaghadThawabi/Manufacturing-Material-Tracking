@@ -33,6 +33,13 @@ Object.assign(schemas.Job.properties,phase2Fields,{
 });
 schemas.Assignee=obj({userId:str,name:str,role:str});
 schemas.ReworkInput=obj({version:{type:'integer'},good:{type:'number',minimum:0},offcuts:{type:'number',minimum:0},scrap:arr('Scrap'),comment:{type:'string',minLength:1}});
+Object.assign(schemas.Member.properties,{active:{type:'boolean'},version:{type:'integer'},inviteExpiresAt:{type:['string','null']},history:arr('Audit')});
+schemas.MemberUpdate=obj({...schemas.MemberInput.properties,version:{type:'integer'},comment:{type:'string',minLength:1}});
+schemas.MemberAction=obj({action:{type:'string',enum:['rotateInvite','revokeInvite','suspend','restore']},version:{type:'integer'},comment:{type:'string',minLength:1}});
+schemas.ReviewChecklist=obj({specifications:{type:'boolean'},quantities:{type:'boolean'},scrapReasons:{type:'boolean'}});
+schemas.ActionInput.properties.checklist=ref('ReviewChecklist');
+schemas.JobInput.properties.changeReason=str;
+Object.assign(schemas.Audit.properties,{actorId:str,actorRole:str,version:{type:'integer'},fromStatus:str,toStatus:str,fieldChanges:{type:'array',items:obj({field:str,before:str,after:str})},checklist:ref('ReviewChecklist')});
 function endpoint(path,method,id,response,body,params=[]){
  const op={operationId:id,parameters:params.map(n=>({name:n,in:'path',required:true,schema:str})),responses:{'200':{description:'Success',content:{'application/json':{schema:response}}}}};
  if(body)op.requestBody={required:true,content:{'application/json':{schema:ref(body)}}};
@@ -47,7 +54,8 @@ endpoint('/companies/{companyId}/settings','post','addSetting',ref('Setting'),'S
 endpoint('/companies/{companyId}/settings/{settingId}','patch','updateSetting',ref('Setting'),'SettingInput',['companyId','settingId']);
 endpoint('/companies/{companyId}/members','get','listMembers',arr('Member'),null,['companyId']);
 endpoint('/companies/{companyId}/members','post','inviteMember',ref('Member'),'MemberInput',['companyId']);
-endpoint('/companies/{companyId}/members/{memberId}','patch','updateMember',ref('Member'),'MemberInput',['companyId','memberId']);
+endpoint('/companies/{companyId}/members/{memberId}','patch','updateMember',ref('Member'),'MemberUpdate',['companyId','memberId']);
+endpoint('/companies/{companyId}/members/{memberId}/actions','post','manageMember',ref('Member'),'MemberAction',['companyId','memberId']);
 endpoint('/companies/{companyId}/jobs','get','listJobs',arr('Job'),null,['companyId']);
 endpoint('/companies/{companyId}/jobs','post','createJob',ref('Job'),'JobInput',['companyId']);
 endpoint('/companies/{companyId}/jobs/{jobId}','get','getJob',ref('Job'),null,['companyId','jobId']);

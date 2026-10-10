@@ -325,7 +325,52 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MemberInput"
+                "$ref": "#/components/schemas/MemberUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/{companyId}/members/{memberId}/actions": {
+      "post": {
+        "operationId": "manageMember",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Member"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberAction"
               }
             }
           }
@@ -1040,6 +1085,24 @@
               "string",
               "null"
             ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "inviteExpiresAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audit"
+            }
           }
         },
         "required": [
@@ -1204,6 +1267,9 @@
               "null"
             ],
             "minimum": 0
+          },
+          "changeReason": {
+            "type": "string"
           }
         },
         "required": [
@@ -1242,6 +1308,46 @@
           },
           "changes": {
             "type": "string"
+          },
+          "actorId": {
+            "type": "string"
+          },
+          "actorRole": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "fieldChanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "before": {
+                  "type": "string"
+                },
+                "after": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "before",
+                "after"
+              ]
+            }
+          },
+          "checklist": {
+            "$ref": "#/components/schemas/ReviewChecklist"
           }
         },
         "required": [
@@ -1458,6 +1564,9 @@
           },
           "version": {
             "type": "integer"
+          },
+          "checklist": {
+            "$ref": "#/components/schemas/ReviewChecklist"
           }
         },
         "required": [
@@ -1599,6 +1708,82 @@
           "offcuts",
           "scrap",
           "comment"
+        ]
+      },
+      "MemberUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "operator",
+              "supervisor",
+              "manager",
+              "admin"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "version",
+          "comment"
+        ]
+      },
+      "MemberAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "rotateInvite",
+              "revokeInvite",
+              "suspend",
+              "restore"
+            ]
+          },
+          "version": {
+            "type": "integer"
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "action",
+          "version",
+          "comment"
+        ]
+      },
+      "ReviewChecklist": {
+        "type": "object",
+        "properties": {
+          "specifications": {
+            "type": "boolean"
+          },
+          "quantities": {
+            "type": "boolean"
+          },
+          "scrapReasons": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "specifications",
+          "quantities",
+          "scrapReasons"
         ]
       },
       "AuthUser": {

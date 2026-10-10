@@ -151,7 +151,33 @@ export const ListMembersResponseItem = zod.object({
   "userId": zod.string().nullable(),
   "name": zod.string(),
   "role": zod.string(),
-  "inviteCode": zod.string().nullable()
+  "inviteCode": zod.string().nullable(),
+  "active": zod.boolean().optional(),
+  "version": zod.number().int().optional(),
+  "inviteExpiresAt": zod.string().nullish(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "actor": zod.string(),
+  "action": zod.string(),
+  "at": zod.string(),
+  "comment": zod.string(),
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
+})).optional()
 })
 export const ListMembersResponse = zod.array(ListMembersResponseItem)
 
@@ -173,7 +199,33 @@ export const InviteMemberResponse = zod.object({
   "userId": zod.string().nullable(),
   "name": zod.string(),
   "role": zod.string(),
-  "inviteCode": zod.string().nullable()
+  "inviteCode": zod.string().nullable(),
+  "active": zod.boolean().optional(),
+  "version": zod.number().int().optional(),
+  "inviteExpiresAt": zod.string().nullish(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "actor": zod.string(),
+  "action": zod.string(),
+  "at": zod.string(),
+  "comment": zod.string(),
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
+})).optional()
 })
 
 
@@ -185,9 +237,12 @@ export const UpdateMemberParams = zod.object({
 
 
 
+
 export const UpdateMemberBody = zod.object({
   "name": zod.string().min(1),
-  "role": zod.enum(['operator', 'supervisor', 'manager', 'admin'])
+  "role": zod.enum(['operator', 'supervisor', 'manager', 'admin']),
+  "version": zod.number().int(),
+  "comment": zod.string().min(1)
 })
 
 export const UpdateMemberResponse = zod.object({
@@ -195,7 +250,82 @@ export const UpdateMemberResponse = zod.object({
   "userId": zod.string().nullable(),
   "name": zod.string(),
   "role": zod.string(),
-  "inviteCode": zod.string().nullable()
+  "inviteCode": zod.string().nullable(),
+  "active": zod.boolean().optional(),
+  "version": zod.number().int().optional(),
+  "inviteExpiresAt": zod.string().nullish(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "actor": zod.string(),
+  "action": zod.string(),
+  "at": zod.string(),
+  "comment": zod.string(),
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
+})).optional()
+})
+
+
+export const ManageMemberParams = zod.object({
+  "companyId": zod.coerce.string(),
+  "memberId": zod.coerce.string()
+})
+
+
+
+
+export const ManageMemberBody = zod.object({
+  "action": zod.enum(['rotateInvite', 'revokeInvite', 'suspend', 'restore']),
+  "version": zod.number().int(),
+  "comment": zod.string().min(1)
+})
+
+export const ManageMemberResponse = zod.object({
+  "id": zod.string(),
+  "userId": zod.string().nullable(),
+  "name": zod.string(),
+  "role": zod.string(),
+  "inviteCode": zod.string().nullable(),
+  "active": zod.boolean().optional(),
+  "version": zod.number().int().optional(),
+  "inviteExpiresAt": zod.string().nullish(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "actor": zod.string(),
+  "action": zod.string(),
+  "at": zod.string(),
+  "comment": zod.string(),
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
+})).optional()
 })
 
 
@@ -256,7 +386,22 @@ export const ListJobsResponseItem = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(listJobsResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(listJobsResponseSheetLengthMmMin).nullish(),
@@ -319,7 +464,8 @@ export const CreateJobBody = zod.object({
   "assignedTo": zod.string().nullish(),
   "offcutSizeNote": zod.string().optional(),
   "offcutLocation": zod.string().optional(),
-  "pendingRework": zod.number().min(createJobBodyPendingReworkMin).nullish()
+  "pendingRework": zod.number().min(createJobBodyPendingReworkMin).nullish(),
+  "changeReason": zod.string().optional()
 })
 
 export const createJobResponseIssuedMin = 0;
@@ -375,7 +521,22 @@ export const CreateJobResponse = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(createJobResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(createJobResponseSheetLengthMmMin).nullish(),
@@ -447,7 +608,22 @@ export const GetJobResponse = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(getJobResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(getJobResponseSheetLengthMmMin).nullish(),
@@ -510,7 +686,8 @@ export const UpdateJobBody = zod.object({
   "assignedTo": zod.string().nullish(),
   "offcutSizeNote": zod.string().optional(),
   "offcutLocation": zod.string().optional(),
-  "pendingRework": zod.number().min(updateJobBodyPendingReworkMin).nullish()
+  "pendingRework": zod.number().min(updateJobBodyPendingReworkMin).nullish(),
+  "changeReason": zod.string().optional()
 })
 
 export const updateJobResponseIssuedMin = 0;
@@ -566,7 +743,22 @@ export const UpdateJobResponse = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(updateJobResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(updateJobResponseSheetLengthMmMin).nullish(),
@@ -588,7 +780,12 @@ export const TransitionJobParams = zod.object({
 export const TransitionJobBody = zod.object({
   "action": zod.enum(['submit', 'approve', 'return', 'reopen']),
   "comment": zod.string().optional(),
-  "version": zod.number().int()
+  "version": zod.number().int(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })
 
 export const transitionJobResponseIssuedMin = 0;
@@ -644,7 +841,22 @@ export const TransitionJobResponse = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(transitionJobResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(transitionJobResponseSheetLengthMmMin).nullish(),
@@ -737,7 +949,22 @@ export const GetDemoJobsResponseItem = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(getDemoJobsResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(getDemoJobsResponseSheetLengthMmMin).nullish(),
@@ -842,7 +1069,22 @@ export const ResolveReworkResponse = zod.object({
   "action": zod.string(),
   "at": zod.string(),
   "comment": zod.string(),
-  "changes": zod.string()
+  "changes": zod.string(),
+  "actorId": zod.string().optional(),
+  "actorRole": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "fromStatus": zod.string().optional(),
+  "toStatus": zod.string().optional(),
+  "fieldChanges": zod.array(zod.object({
+  "field": zod.string(),
+  "before": zod.string(),
+  "after": zod.string()
+})).optional(),
+  "checklist": zod.object({
+  "specifications": zod.boolean(),
+  "quantities": zod.boolean(),
+  "scrapReasons": zod.boolean()
+}).optional()
 })),
   "sheetWidthMm": zod.number().min(resolveReworkResponseSheetWidthMmMin).nullish(),
   "sheetLengthMm": zod.number().min(resolveReworkResponseSheetLengthMmMin).nullish(),

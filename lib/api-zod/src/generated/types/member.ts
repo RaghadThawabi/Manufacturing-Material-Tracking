@@ -4,6 +4,7 @@
  * Api
  * OpenAPI spec version: 1.0.0
  */
+import type { Audit } from './audit';
 
 export interface Member {
   id: string;
@@ -13,4 +14,9 @@ export interface Member {
   role: string;
   /** @nullable */
   inviteCode: string | null;
+  active?: boolean;
+  version?: number;
+  /** @nullable */
+  inviteExpiresAt?: string | null;
+  history?: Audit[];
 }
