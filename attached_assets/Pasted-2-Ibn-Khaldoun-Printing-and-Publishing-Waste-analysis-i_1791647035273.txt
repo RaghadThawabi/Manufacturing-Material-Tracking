@@ -1,0 +1,49 @@
+2  Ibn Khaldoun Printing and Publishing 
+Waste analysis in a cutting job 
+The situation. A printed-carton job uses more board than expected. The production team wants to distinguish true waste from 
+reusable offcuts and see whether the loss is associated with setup, layout or damaged material. 
+Why this matters. The factory issued 1,200 kg of board to one job. The team needs to know how much became saleable cartons, 
+how much was lost and how much can be reused. Mixing reusable pieces with waste would make the problem look larger than it 
+is. 
+Who would use it. The cutting operator, production supervisor and manager. 
+Proposed internship tool. A digital job card where the operator records the board issued and the weight of good product, waste 
+by reason and reusable pieces. The tool checks that these figures add back to the issued weight, then compares this job with 
+another job on the same machine. 
+Terms used here. Scrap is material treated as waste in this exercise. Offcuts are leftover pieces that can be reused. Yield is good 
+output divided by material issued. 
+Case records and assumptions 
+Case input 
+Case record 
+Job IK-202 
+1,200 kg board issued → 900 kg good cut product + 180 kg setup/layout scrap + 60 kg 
+damaged scrap + 60 kg reusable offcuts 
+Comparison job IK-203 
+Machine 
+1,000 kg board issued → 820 kg good product + 100 kg scrap + 80 kg reusable offcuts 
+Cutting machine CT-2 for both jobs 
+Specification 
+Product, sheet size, planned yield and cutting instruction attached to each job 
+How staff would use the tool 
+1.  Operator opens a job card, selects material and cutting machine, and records issued weight. 
+2.  At job close, staff record good output, each scrap reason, reusable offcuts and any rework separately. 
+3.  The application rejects an unbalanced job and displays yield and waste with explicit definitions. 
+4.  Manager compares IK-202 with IK-203 and opens the records behind the difference. 
+What the tool should show 
+• IK-202 balances at 1,200 kg: 900 good + 240 scrap + 60 reusable. Scrap rate = 240 ÷ 1,200 = 20%; good yield = 75%. 
+• IK-203 scrap rate = 100 ÷ 1,000 = 10%. IK-202 is 10 percentage points higher. 
+• The largest loss category for IK-202 is setup/layout scrap at 180 kg. 
+Questions it should answer. Where did the 1,200 kg go? Which waste category is largest, and how does this job compare with 
+the other job? 
+Digital HERizon  |  Proposed MSME challenge cases 
+2  Ibn Khaldoun Printing and Publishing Business Opportunity 
+Factory demonstration 
+What the factory owner should verify. The challenge owner can reproduce both calculations and see why reusable offcuts are 
+excluded from scrap. 
+Optional AI assistance. An AI summary may point to the 180 kg setup/layout entry and suggest an investigation; it should not 
+claim the exact root cause without operator evidence. 
+A product that could serve other factories 
+Proposed product. Cutting material yield tool 
+Core promise. Show where board or paper goes in every cutting job and identify the biggest avoidable material losses without 
+counting reusable pieces as waste. 
+Potential customers beyond the pilot factory. Carton producers, commercial printers, label producers and other converters 
+that cut sheets and record material use by job.

@@ -1,2 +1,3 @@
 - [Manufacturing accounting](manufacturing-accounting.md) — distinguish reusable offcuts from scrap; sample comparisons are not evidence of root causes.
 - [Auth template setup](auth-template.md) — copied browser auth template needs composite-library setup; generated clients require DOM iterable types.
+- [Role responsibilities](role-responsibilities.md) — shared Admin/Manager management access, Admin-only settings, and requested work-email sign-in.
