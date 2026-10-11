@@ -19,3 +19,4 @@
 
 export * from "./auth";
 export * from "./manufacturing";
+export * from "./detective";

@@ -375,6 +375,80 @@ export interface MemberAction {
   comment: string;
 }
 
+export interface DetectiveJob {
+  id: string;
+  number: string;
+  date: string;
+  unit: string;
+  version: number;
+  issued: number;
+  scrap: number;
+  good: number;
+  scrapRate: number;
+  yieldRate: number;
+}
+
+export interface WasteSignal {
+  job: DetectiveJob;
+  baseline: DetectiveJob[];
+  medianRate: number;
+  difference: number;
+  largestReason: string;
+  explanation: string;
+}
+
+export interface InvestigationInput {
+  jobId: string;
+  /** @maxLength 2000 */
+  action: string;
+  /** @maxLength 4000 */
+  notes: string;
+}
+
+export type InvestigationUpdateStatus = typeof InvestigationUpdateStatus[keyof typeof InvestigationUpdateStatus];
+
+
+export const InvestigationUpdateStatus = {
+  open: 'open',
+  monitoring: 'monitoring',
+  closed: 'closed',
+} as const;
+
+export interface InvestigationUpdate {
+  version: number;
+  /** @maxLength 2000 */
+  action: string;
+  /** @maxLength 4000 */
+  notes: string;
+  actionDate: string;
+  status: InvestigationUpdateStatus;
+}
+
+export interface WasteInvestigation {
+  id: string;
+  version: number;
+  signal: WasteSignal;
+  action: string;
+  notes: string;
+  actionDate: string;
+  status: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  followups: DetectiveJob[];
+  /** @nullable */
+  afterScrapRate: number | null;
+  /** @nullable */
+  afterYieldRate: number | null;
+}
+
+export interface DetectiveSummary {
+  signals: WasteSignal[];
+  investigations: WasteInvestigation[];
+  eligibleJobs: number;
+  insufficientHistory: number;
+}
+
 export interface AuthUser {
   id: string;
   /** @nullable */

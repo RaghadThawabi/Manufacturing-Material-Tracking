@@ -688,6 +688,115 @@
         }
       }
     },
+    "/companies/{companyId}/detective": {
+      "get": {
+        "operationId": "getDetective",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectiveSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/{companyId}/detective/investigations": {
+      "post": {
+        "operationId": "createInvestigation",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WasteInvestigation"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvestigationInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/{companyId}/detective/investigations/{investigationId}": {
+      "patch": {
+        "operationId": "updateInvestigation",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "investigationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WasteInvestigation"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvestigationUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/user": {
       "get": {
         "tags": [
@@ -1784,6 +1893,239 @@
           "specifications",
           "quantities",
           "scrapReasons"
+        ]
+      },
+      "DetectiveJob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "issued": {
+            "type": "number"
+          },
+          "scrap": {
+            "type": "number"
+          },
+          "good": {
+            "type": "number"
+          },
+          "scrapRate": {
+            "type": "number"
+          },
+          "yieldRate": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "date",
+          "unit",
+          "version",
+          "issued",
+          "scrap",
+          "good",
+          "scrapRate",
+          "yieldRate"
+        ]
+      },
+      "WasteSignal": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/DetectiveJob"
+          },
+          "baseline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectiveJob"
+            }
+          },
+          "medianRate": {
+            "type": "number"
+          },
+          "difference": {
+            "type": "number"
+          },
+          "largestReason": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "job",
+          "baseline",
+          "medianRate",
+          "difference",
+          "largestReason",
+          "explanation"
+        ]
+      },
+      "InvestigationInput": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "jobId",
+          "action",
+          "notes"
+        ]
+      },
+      "InvestigationUpdate": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer"
+          },
+          "action": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "actionDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "monitoring",
+              "closed"
+            ]
+          }
+        },
+        "required": [
+          "version",
+          "action",
+          "notes",
+          "actionDate",
+          "status"
+        ]
+      },
+      "WasteInvestigation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "signal": {
+            "$ref": "#/components/schemas/WasteSignal"
+          },
+          "action": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "actionDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "followups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectiveJob"
+            }
+          },
+          "afterScrapRate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "afterYieldRate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "signal",
+          "action",
+          "notes",
+          "actionDate",
+          "status",
+          "createdBy",
+          "createdAt",
+          "updatedAt",
+          "followups",
+          "afterScrapRate",
+          "afterYieldRate"
+        ]
+      },
+      "DetectiveSummary": {
+        "type": "object",
+        "properties": {
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WasteSignal"
+            }
+          },
+          "investigations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WasteInvestigation"
+            }
+          },
+          "eligibleJobs": {
+            "type": "integer"
+          },
+          "insufficientHistory": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "signals",
+          "investigations",
+          "eligibleJobs",
+          "insufficientHistory"
         ]
       },
       "AuthUser": {

@@ -65,6 +65,15 @@ endpoint('/companies/{companyId}/summary','get','getSummary',ref('Summary'),null
 endpoint('/demo/jobs','get','getDemoJobs',arr('Job'));
 endpoint('/companies/{companyId}/assignees','get','listAssignees',arr('Assignee'),null,['companyId']);
 endpoint('/companies/{companyId}/jobs/{jobId}/rework','post','resolveRework',ref('Job'),'ReworkInput',['companyId','jobId']);
+schemas.DetectiveJob=obj({id:str,number:str,date:str,unit:str,version:{type:'integer'},issued:{type:'number'},scrap:{type:'number'},good:{type:'number'},scrapRate:{type:'number'},yieldRate:{type:'number'}});
+schemas.WasteSignal=obj({job:ref('DetectiveJob'),baseline:arr('DetectiveJob'),medianRate:{type:'number'},difference:{type:'number'},largestReason:str,explanation:str});
+schemas.InvestigationInput=obj({jobId:str,action:{type:'string',maxLength:2000},notes:{type:'string',maxLength:4000}});
+schemas.InvestigationUpdate=obj({version:{type:'integer'},action:{type:'string',maxLength:2000},notes:{type:'string',maxLength:4000},actionDate:str,status:{type:'string',enum:['open','monitoring','closed']}});
+schemas.WasteInvestigation=obj({id:str,version:{type:'integer'},signal:ref('WasteSignal'),action:str,notes:str,actionDate:str,status:str,createdBy:str,createdAt:str,updatedAt:str,followups:arr('DetectiveJob'),afterScrapRate:{type:['number','null']},afterYieldRate:{type:['number','null']}});
+schemas.DetectiveSummary=obj({signals:arr('WasteSignal'),investigations:arr('WasteInvestigation'),eligibleJobs:{type:'integer'},insufficientHistory:{type:'integer'}});
+endpoint('/companies/{companyId}/detective','get','getDetective',ref('DetectiveSummary'),null,['companyId']);
+endpoint('/companies/{companyId}/detective/investigations','post','createInvestigation',ref('WasteInvestigation'),'InvestigationInput',['companyId']);
+endpoint('/companies/{companyId}/detective/investigations/{investigationId}','patch','updateInvestigation',ref('WasteInvestigation'),'InvestigationUpdate',['companyId','investigationId']);
 const text=fs.readFileSync('.local/skills/replit-auth/references/openapi.md','utf8');
 // Preserve supplied auth specification blocks as YAML alongside JSON-compatible YAML.
 const blocks=[...text.matchAll(/```yaml\n([\s\S]*?)```/g)].map(m=>m[1]);

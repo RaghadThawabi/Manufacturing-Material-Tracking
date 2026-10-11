@@ -19,3 +19,9 @@ Pending rework is material still awaiting an outcome, not an additional issued q
 **Why:** Phase 2 must support rework without double counting and preserve existing factory records.
 
 **How to apply:** Keep resolution atomic and version-checked. After a recorded transfer, prevent ordinary outcome editing from erasing its accounting history; reopen reviewed jobs before further transfers. Apply new mandatory specifications to new records, not retrospectively to the supplied samples.
+
+Waste Detective's before/after evidence must exclude jobs on the action's calendar date and preserve the original investigated result as a snapshot.
+
+**Why:** Production records only establish a date, not whether a job ran before or after an action that day. Later edits to production records must not silently rewrite the investigation's original evidence. Recorded improvement is not proof of causation.
+
+**How to apply:** Use strictly later production dates for follow-up comparisons. Distinguish the flagged-job snapshot from the historical median used to detect it, and label live follow-up results as observed changes.

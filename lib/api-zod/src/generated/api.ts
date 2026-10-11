@@ -1098,6 +1098,250 @@ export const ResolveReworkResponse = zod.object({
 })
 
 
+export const GetDetectiveParams = zod.object({
+  "companyId": zod.coerce.string()
+})
+
+export const GetDetectiveResponse = zod.object({
+  "signals": zod.array(zod.object({
+  "job": zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+}),
+  "baseline": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "medianRate": zod.number(),
+  "difference": zod.number(),
+  "largestReason": zod.string(),
+  "explanation": zod.string()
+})),
+  "investigations": zod.array(zod.object({
+  "id": zod.string(),
+  "version": zod.number().int(),
+  "signal": zod.object({
+  "job": zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+}),
+  "baseline": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "medianRate": zod.number(),
+  "difference": zod.number(),
+  "largestReason": zod.string(),
+  "explanation": zod.string()
+}),
+  "action": zod.string(),
+  "notes": zod.string(),
+  "actionDate": zod.string(),
+  "status": zod.string(),
+  "createdBy": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "followups": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "afterScrapRate": zod.number().nullable(),
+  "afterYieldRate": zod.number().nullable()
+})),
+  "eligibleJobs": zod.number().int(),
+  "insufficientHistory": zod.number().int()
+})
+
+
+export const CreateInvestigationParams = zod.object({
+  "companyId": zod.coerce.string()
+})
+
+export const createInvestigationBodyActionMax = 2000;
+
+export const createInvestigationBodyNotesMax = 4000;
+
+
+
+export const CreateInvestigationBody = zod.object({
+  "jobId": zod.string(),
+  "action": zod.string().max(createInvestigationBodyActionMax),
+  "notes": zod.string().max(createInvestigationBodyNotesMax)
+})
+
+export const CreateInvestigationResponse = zod.object({
+  "id": zod.string(),
+  "version": zod.number().int(),
+  "signal": zod.object({
+  "job": zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+}),
+  "baseline": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "medianRate": zod.number(),
+  "difference": zod.number(),
+  "largestReason": zod.string(),
+  "explanation": zod.string()
+}),
+  "action": zod.string(),
+  "notes": zod.string(),
+  "actionDate": zod.string(),
+  "status": zod.string(),
+  "createdBy": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "followups": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "afterScrapRate": zod.number().nullable(),
+  "afterYieldRate": zod.number().nullable()
+})
+
+
+export const UpdateInvestigationParams = zod.object({
+  "companyId": zod.coerce.string(),
+  "investigationId": zod.coerce.string()
+})
+
+export const updateInvestigationBodyActionMax = 2000;
+
+export const updateInvestigationBodyNotesMax = 4000;
+
+
+
+export const UpdateInvestigationBody = zod.object({
+  "version": zod.number().int(),
+  "action": zod.string().max(updateInvestigationBodyActionMax),
+  "notes": zod.string().max(updateInvestigationBodyNotesMax),
+  "actionDate": zod.string(),
+  "status": zod.enum(['open', 'monitoring', 'closed'])
+})
+
+export const UpdateInvestigationResponse = zod.object({
+  "id": zod.string(),
+  "version": zod.number().int(),
+  "signal": zod.object({
+  "job": zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+}),
+  "baseline": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "medianRate": zod.number(),
+  "difference": zod.number(),
+  "largestReason": zod.string(),
+  "explanation": zod.string()
+}),
+  "action": zod.string(),
+  "notes": zod.string(),
+  "actionDate": zod.string(),
+  "status": zod.string(),
+  "createdBy": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "followups": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "date": zod.string(),
+  "unit": zod.string(),
+  "version": zod.number().int(),
+  "issued": zod.number(),
+  "scrap": zod.number(),
+  "good": zod.number(),
+  "scrapRate": zod.number(),
+  "yieldRate": zod.number()
+})),
+  "afterScrapRate": zod.number().nullable(),
+  "afterYieldRate": zod.number().nullable()
+})
+
+
 /**
  * @summary Get the currently authenticated user
  */

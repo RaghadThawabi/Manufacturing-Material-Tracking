@@ -18,6 +18,7 @@ import Settings from '@/pages/settings';
 import Onboarding from '@/pages/onboarding';
 import Compare from '@/pages/compare';
 import Reports from '@/pages/reports';
+import Detective from '@/pages/detective';
 import { AppShell, Logo } from '@/components/shell';
 import { ErrorPanel } from '@/components/mf-ui';
 import { CompanyProvider, useCompany, errMsg } from '@/lib/mf';
@@ -80,6 +81,7 @@ function Router() {
           <Route path="/compare">{() => <Protected page={Compare} />}</Route>
           <Route path="/review">{() => <Protected page={Review} />}</Route>
           <Route path="/reports">{() => <Protected page={Reports} />}</Route>
+          <Route path="/detective">{() => <Protected page={Detective} />}</Route>
           <Route path="/settings">{() => <Protected page={Settings} />}</Route>
           <Route component={NotFound} />
         </Switch>
