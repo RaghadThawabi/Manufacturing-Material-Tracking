@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SummaryBoard, summarize, JobRow, ErrorPanel, PageHeader } from "@/components/mf-ui";
 import { Logo } from "@/components/shell";
 import { errMsg, useCompany } from "@/lib/mf";
+import { ScrapInsight } from "@/components/scrap-insight";
 
 function BoardSkeleton() {
   return <div className="space-y-4"><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}</div><Skeleton className="h-64" /></div>;
@@ -64,7 +65,9 @@ function Dashboard() {
       <PageHeader eyebrow={company!.name} title="Overview">
         <Button asChild size="lg" className="h-12"><Link href="/jobs/new" data-testid="link-record-job"><Plus />Record job</Link></Button>
       </PageHeader>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground" data-testid="text-dashboard-scope">Company dashboard · all dates · units shown separately · quantities from submitted + approved jobs · counts include all statuses</p>
       {s.isLoading ? <BoardSkeleton /> : s.error ? <ErrorPanel message={errMsg(s.error)} onRetry={() => s.refetch()} /> : s.data && <SummaryBoard summary={s.data} />}
+      {(company!.role === "admin" || company!.role === "manager") && <ScrapInsight key={id} companyId={id} />}
       <section className="mt-8 rounded-md border bg-card">
         <div className="flex items-center justify-between border-b px-5 py-3"><h3 className="font-bold">Recent activity</h3><Link href="/jobs" className="text-sm font-semibold text-primary">All jobs</Link></div>
         {jobs.isLoading ? <div className="space-y-2 p-4">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>

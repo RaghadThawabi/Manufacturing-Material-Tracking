@@ -8,6 +8,12 @@ Reusable offcuts are not actual scrap, and recording them does not prove realize
 
 **How to apply:** Preserve distinctions in validation, summaries, and future optimization. The two supplied jobs establish arithmetic examples only, not machine performance or root causes. Their shared machine does not establish comparability.
 
+Management insights must identify the largest **recorded scrap reason**, not a proven root cause; do not invent causes or savings. Its share must use total recorded scrap in the same clearly defined filter scope and unit, distinguish approved from submitted results, and link to contributing production jobs.
+
+**Why:** The user explicitly required traceable, actual-data insights while preserving existing dashboard functionality and company data.
+
+**How to apply:** Keep illustrative samples opt-in for the new management insight. Do not mix units or silently treat awaiting-review records as approved evidence. Mark unknown comparison specifications rather than filling them in.
+
 Pending rework is material still awaiting an outcome, not an additional issued quantity or a cumulative count of processing passes. Resolve it by transferring quantities to final outcomes while keeping issued material unchanged. Legacy records must not acquire invented specifications.
 
 **Why:** Phase 2 must support rework without double counting and preserve existing factory records.

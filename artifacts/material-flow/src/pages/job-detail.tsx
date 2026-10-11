@@ -36,6 +36,15 @@ export default function JobDetail() {
     setCheck({ specifications: false, quantities: false, scrapReasons: false });
     setComment("");
   }, [cid, jobId, q.data?.version]);
+  useEffect(() => {
+    if (!q.data || editing) return;
+    const scrollToAudit = () => {
+      if (window.location.hash === "#audit") document.getElementById("audit")?.scrollIntoView({ block: "start" });
+    };
+    const frame = requestAnimationFrame(scrollToAudit);
+    window.addEventListener("hashchange", scrollToAudit);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("hashchange", scrollToAudit); };
+  }, [cid, jobId, q.data?.id, editing]);
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: getGetJobQueryKey(cid, jobId) });
@@ -104,6 +113,7 @@ export default function JobDetail() {
       <Link href="/jobs" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Jobs</Link>
       <PageHeader eyebrow={`${job.date} · version ${job.version}`} title={`Job ${job.number}`}>
         <StatusBadge status={job.status} />{job.isSample && <SampleFlag />}
+        {canReview(company?.role) && <Button asChild size="lg" variant="outline" className="h-11"><Link href={`/compare?a=${encodeURIComponent(job.id)}`} data-testid="link-compare-job">Compare</Link></Button>}
         {editable && <Button size="lg" variant="outline" className="h-11" onClick={() => { setEditVersion(job.version); setEditing(true); }} data-testid="button-edit"><Pencil />Edit</Button>}
         {editable && <Button size="lg" className="h-11" disabled={transition.isPending} onClick={() => act("submit")} data-testid="button-submit-job">Submit</Button>}
       </PageHeader>
@@ -140,7 +150,7 @@ export default function JobDetail() {
               <tbody>{job.scrap.map((s, i) => <tr key={i} className="border-b last:border-0"><td className="py-2"><i className="mr-2 inline-block h-2.5 w-2.5 rounded-[2px] bg-waste" />{s.reason || "—"}</td><td className="num py-2 text-right">{s.quantity === null ? "Not measured" : `${fmt(s.quantity)} ${u}`}</td></tr>)}</tbody>
             </table>
           </section>
-          <section className="rounded-md border bg-card p-5"><h3 className="mb-4 font-bold">Audit trail</h3><AuditTrail audit={job.audit} /></section>
+          <section id="audit" className="scroll-mt-20 rounded-md border bg-card p-5"><h3 className="mb-4 font-bold">Audit trail</h3><AuditTrail audit={job.audit} /></section>
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">

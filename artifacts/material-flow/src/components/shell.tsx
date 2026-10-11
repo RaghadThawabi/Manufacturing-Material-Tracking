@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutGrid, ClipboardList, PlusSquare, ShieldCheck, Settings2, LogOut, ChevronsUpDown, Check, Plus, Menu, X, LogIn } from "lucide-react";
+import { LayoutGrid, ClipboardList, PlusSquare, ShieldCheck, Settings2, LogOut, ChevronsUpDown, Check, Plus, Menu, X, LogIn, GitCompareArrows } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/", label: "Overview", Icon: LayoutGrid },
     { href: "/jobs", label: "Jobs", Icon: ClipboardList },
     { href: "/jobs/new", label: "Record job", Icon: PlusSquare },
-    ...(canReview(company.role) ? [{ href: "/review", label: "Review queue", Icon: ShieldCheck }] : []),
+    ...(canReview(company.role) ? [{ href: "/review", label: "Review queue", Icon: ShieldCheck }, { href: "/compare", label: "Compare jobs", Icon: GitCompareArrows }] : []),
     { href: "/settings", label: "Settings", Icon: Settings2 },
   ];
   const active = (h: string) => (h === "/" ? loc === "/" : h === "/jobs" ? loc === "/jobs" || (loc.startsWith("/jobs/") && loc !== "/jobs/new") : loc.startsWith(h));

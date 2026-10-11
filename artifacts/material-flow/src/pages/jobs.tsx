@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader, JobRow, ErrorPanel, SummaryBoard, summarize } from "@/components/mf-ui";
-import { errMsg, useCompany } from "@/lib/mf";
+import { canReview, errMsg, useCompany } from "@/lib/mf";
 
 const ALL = "__all";
 
@@ -33,7 +33,7 @@ export default function Jobs() {
   );
   return (
     <>
-      <PageHeader eyebrow={company!.name} title="Jobs"><Button asChild size="lg" className="h-12"><Link href="/jobs/new" data-testid="link-new-job"><Plus />Record job</Link></Button></PageHeader>
+      <PageHeader eyebrow={company!.name} title="Jobs">{canReview(company?.role) && <Button asChild size="lg" variant="outline" className="h-12"><Link href="/compare" data-testid="link-compare-jobs">Compare two jobs</Link></Button>}<Button asChild size="lg" className="h-12"><Link href="/jobs/new" data-testid="link-new-job"><Plus />Record job</Link></Button></PageHeader>
       <div className="rise mb-6 space-y-3 rounded-md border bg-card p-4">
         <div className="relative"><Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
           <Input data-testid="input-search" className="h-11 pl-10" placeholder="Search job number or notes" value={f.search} onChange={(e) => setF({ ...f, search: e.target.value })} /></div>

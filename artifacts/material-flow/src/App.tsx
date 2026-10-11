@@ -16,6 +16,7 @@ import JobDetail from '@/pages/job-detail';
 import Review from '@/pages/review';
 import Settings from '@/pages/settings';
 import Onboarding from '@/pages/onboarding';
+import Compare from '@/pages/compare';
 import { AppShell, Logo } from '@/components/shell';
 import { ErrorPanel } from '@/components/mf-ui';
 import { CompanyProvider, useCompany, errMsg } from '@/lib/mf';
@@ -75,6 +76,7 @@ function Router() {
           <Route path="/jobs">{() => <Protected page={Jobs} />}</Route>
           <Route path="/jobs/new">{() => <Protected page={JobNew} />}</Route>
           <Route path="/jobs/:id">{() => <Protected page={JobDetail} />}</Route>
+          <Route path="/compare">{() => <Protected page={Compare} />}</Route>
           <Route path="/review">{() => <Protected page={Review} />}</Route>
           <Route path="/settings">{() => <Protected page={Settings} />}</Route>
           <Route component={NotFound} />
