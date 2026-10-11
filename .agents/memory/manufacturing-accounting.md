@@ -25,3 +25,9 @@ Waste Detective's before/after evidence must exclude jobs on the action's calend
 **Why:** Production records only establish a date, not whether a job ran before or after an action that day. Later edits to production records must not silently rewrite the investigation's original evidence. Recorded improvement is not proof of causation.
 
 **How to apply:** Use strictly later production dates for follow-up comparisons. Distinguish the flagged-job snapshot from the historical median used to detect it, and label live follow-up results as observed changes.
+
+Keep Smart Cutting Advisor separate from existing production workflows and records. Rectangular layout planning should use deterministic geometric calculations, not AI-generated coordinates.
+
+**Why:** The user explicitly prioritizes accurate calculations and a working simple solution without affecting existing pages, workflows, calculations or data. Planned leftover area is not measured scrap and may include reusable offcuts.
+
+**How to apply:** Label proposals as estimates, not proven optima or machine-ready instructions. Do not turn unused area into kg waste, realized savings or production-accounting entries without separately established evidence.
