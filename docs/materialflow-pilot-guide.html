@@ -1,73 +1,634 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MaterialFlow — Features, roles and pilot test guide</title>
-<style>body{font:16px/1.65 system-ui,sans-serif;color:#18212b;max-width:1100px;margin:40px auto;padding:0 24px}h1,h2,h3{line-height:1.25}h2{margin-top:42px;border-bottom:2px solid #e0a51c;padding-bottom:10px}table{border-collapse:collapse;width:100%;margin:18px 0;font-size:14px}td,th{border:1px solid #ccd2d8;padding:10px;text-align:left;vertical-align:top}th{background:#edf2f4}.note{border-left:4px solid #df9c00;background:#fff8e5;padding:14px}a{color:#126071}code{background:#eff2f4;padding:2px 5px}@media print{body{font-size:11px;margin:0}h2{break-after:avoid}tr{break-inside:avoid}}</style>
-<h1>MaterialFlow: complete pilot guide</h1><p>Core phases 1–5 · Feature inventory, permissions, publishing and acceptance scenarios</p>
-<p class="note">Use a dedicated <strong>Pilot Test</strong> company, not live factory records. These scenarios are a repeatable acceptance checklist—not a claim that every case below has already been browser-tested. Publishing and real-account login must be verified on your published URL.</p>
-<h2>1. Publish for employee testing</h2>
-<ol><li>Open Replit’s <strong>Publishing</strong> tool / <strong>Publish</strong> button. Review build, database and access settings.</li>
-<li>For straightforward employee testing choose <strong>Public</strong> app access if your workspace permits it. This removes the Replit deployment-access gate; MaterialFlow still requires sign-in and company membership for company data. The anonymous sample demo remains public. If company policy requires Invite only, authorize each tester at the Replit publishing-access layer <em>and</em> through MaterialFlow Team. These are separate permissions.</li>
-<li>Review the production database choice. Development and production are separate. If the initial-publish option <strong>Set up your production database with your current development data</strong> is offered, select it only if you intentionally want those records copied. Otherwise create the Pilot Test company after publishing. Do not overwrite an existing production database merely to test.</li>
-<li>Click Publish and wait for completion. Copy the actual published URL shown by Replit. Do not use a <code>.replit.dev</code> preview link for employees.</li>
-<li>Open the published URL as Admin. Confirm company records are present if you chose to copy them. Otherwise create a test company. Check the name, role and account shown before proceeding.</li>
-<li>From <strong>Settings → Team</strong> on the <em>published app</em>, create/copy each invitation. Invitations copied from development point to development and may reference records absent from production. Share the links manually; automatic email delivery is not provided.</li>
-<li>Use separate browser profiles or devices for Admin, Manager, Supervisor, Operator A and Operator B. Each must sign in with a distinct account. Incognito windows within the same browser can share a session, so profiles are safer.</li>
-<li>Employees open their invitation, sign in using the existing Replit sign-in flow, and join the company. For email-bound invitations use the matching account email. Check the resulting company and role. An invitation does not switch the currently signed-in account.</li></ol>
-<p>If you see Replit’s “You don’t have access to this app,” check the URL and deployment sharing first. That is outside MaterialFlow’s role controls. Do not grant employees project <strong>Editor</strong> access just to use the app; project collaborators can access code and project history.</p>
-<p>References: <a href="https://docs.replit.com/features/publishing/overview">Publishing</a> · <a href="https://docs.replit.com/features/publishing/private-deployments">Access settings</a> · <a href="https://docs.replit.com/features/data-and-storage/development-and-production">Development and production data</a>.</p>
-<h2>2. Full feature inventory</h2>
-<table><tr><th>Area</th><th>Available capabilities</th></tr>
-<tr><td>Accounts and companies</td><td>Existing Replit sign-in; company creation and joining; company switcher; visible identity and role; isolated company records.</td></tr>
-<tr><td>Configuration</td><td>Company name and balance tolerance; materials, machines, products, scrap reasons and units (kg, sheets, m); rename and activate/deactivate configuration without deleting historical job records; read-only configuration for non-Admins.</td></tr>
-<tr><td>Team and access</td><td>Admin assigns roles; invitation links/codes, expiry, rotation and revocation; joined-member suspension/restoration; access-change reasons and history. A pending invitation is not a joined employee and cannot receive an assignment.</td></tr>
-<tr><td>Job specifications</td><td>Job number/date, material, machine, product, unit, sheet dimensions in mm, instructions, planned yield and assigned operator. Save incomplete drafts; submission requires complete measured records.</td></tr>
-<tr><td>Material accounting</td><td>Issued material, good output, separate reasoned scrap entries, reusable offcuts, offcut size/location notes and pending rework; live reconciliation and yield/scrap indicators; submission blocked outside tolerance.</td></tr>
-<tr><td>Rework</td><td>Transfer pending material to good, scrap and/or reusable outcomes; issued quantity stays unchanged. Recorded transfers are traceable; ordinary outcome editing cannot erase completed transfers.</td></tr>
-<tr><td>Review and corrections</td><td>Draft → submitted → approved, or returned for correction; checklist for specifications/quantities/reasons; comments required for exceptions, return/reopen and returned corrections; attention flags for pending rework and below-plan yield; reopen approved records for further work.</td></tr>
-<tr><td>Audit and conflicts</td><td>Actor, role, action, review comments, versions and recorded changes; concurrent stale updates rejected; company/member checks on server requests.</td></tr>
-<tr><td>Overview and work lists</td><td>Existing company totals, status counts, per-unit material balance, recorded reasons and recent jobs; setup readiness and role-specific next-action job lists.</td></tr>
-<tr><td>Management insight</td><td>Largest recorded scrap reason, ties, share of selected scrap, exact filters and source jobs. Approved default; submitted split; sample opt-in; no root-cause or savings claims.</td></tr>
-<tr><td>Comparison</td><td>Two production jobs side by side: specifications, quantities, rates and scrap reasons; B−A differences; percentage points for rates; missing/different specifications and unit mismatch warnings; source/audit links.</td></tr>
-<tr><td>Reports</td><td>Filtered production CSV with scope, generation time, review status, sample labels, units, outcomes/rates/specifications and individual scrap-reason entries. Unknown measurements remain blank. Spreadsheet-formula text is neutralized. No totals combining unlike units.</td></tr></table>
-<p class="note">Not included: passwordless email-code sign-in, automatic invitation emails, multiple materials/stages in one job, automatic unit conversion, full offcut inventory, AI-proven causes, cutting optimization or calculated financial savings. Reusable offcuts are recorded material—not proof of realized savings.</p>
-<h2>3. Role permissions</h2>
-<table><tr><th>Action</th><th>Admin</th><th>Manager</th><th>Supervisor</th><th>Operator</th></tr>
-<tr><td>Read company jobs/basic overview and configuration</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Create jobs</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Self-assigned</td></tr>
-<tr><td>Edit/submit draft or returned jobs; resolve rework</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Own assigned jobs; legacy unassigned jobs they created</td></tr>
-<tr><td>Assign/reassign jobs</td><td>Joined operator or self</td><td>Joined operator or self</td><td>Joined operator or self</td><td>No reassignment</td></tr>
-<tr><td>Approve, return, reopen</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
-<tr><td>Largest recorded scrap contributor</td><td>Yes</td><td>Yes</td><td>No dedicated insight</td><td>No dedicated insight</td></tr>
-<tr><td>Compare jobs and CSV reports</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No dedicated page/export</td></tr>
-<tr><td>Edit company settings; administer team/access</td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr></table>
-<p>Operators can read other company jobs; assignments restrict modification, not company-wide visibility. Report-page restrictions do not make the underlying company job data confidential from operators. Authorized reviewers can review their own jobs, supporting small teams. No destructive job-delete workflow is provided.</p>
-<h2>4. Test setup and known quantities</h2>
-<p>Create Pilot Test with unit kg; configure material <strong>Pilot board</strong>, machine <strong>Cutter A</strong>, product <strong>Pilot box</strong>, reasons <strong>Setup/layout</strong> and <strong>Damaged material</strong>. Set tolerance <strong>0</strong> for exact test arithmetic. Invite the four additional accounts and have them join. Assign Operator A to the test jobs. Use today's date and unique job numbers.</p>
-<p>For new jobs use dimensions 700 × 1000 mm, instructions “Pilot test; verify all weights,” and planned yield 90%. These are illustrative test values, not manufacturing recommendations.</p>
-<table><tr><th>Job</th><th>Issued</th><th>Good</th><th>Offcuts</th><th>Scrap</th><th>Pending</th><th>Expected</th></tr>
-<tr><td>PILOT-A</td><td>100 kg</td><td>80</td><td>5</td><td>Setup 10 + Damage 5</td><td>0</td><td>Balanced; yield 80%; scrap 15%; reusable 5%</td></tr>
-<tr><td>PILOT-B</td><td>100 kg</td><td>85</td><td>5</td><td>Setup 5 + Damage 5</td><td>0</td><td>Balanced; yield 85%; scrap 10%</td></tr>
-<tr><td>PILOT-R before resolution</td><td>100 kg</td><td>70</td><td>5</td><td>Setup 10</td><td>15</td><td>Balanced; pending is neither good nor scrap</td></tr>
-<tr><td>PILOT-R after transfer</td><td>100 kg</td><td>80</td><td>7</td><td>Setup 10 + Damage 3</td><td>0</td><td>Transfer 10 to good, 2 offcuts, 3 scrap; still balances</td></tr></table>
-<h2>5. End-to-end acceptance scenarios</h2>
-<table><tr><th>Test</th><th>Steps</th><th>Expected result</th></tr>
-<tr><td>1. Setup readiness</td><td>Admin creates an empty company; opens checklist; adds each configuration; invites staff, then staff join.</td><td>Configuration readiness reflects active settings. Pending invitations are distinct from joined active members. Completing setup does not mark a job approved.</td></tr>
-<tr><td>2. Identity and invitations</td><td>Invite each role; open each link in its own browser profile; reload after joining.</td><td>Correct account, company and role persist. Using the existing Admin session does not become the invited employee.</td></tr>
-<tr><td>3. Assignment</td><td>Admin creates PILOT-A draft and assigns Operator A; Operator A opens Overview.</td><td>Job appears in their work list. Invited-but-not-joined people are not assignable. Operator B can read but cannot edit/submit A’s assigned job.</td></tr>
-<tr><td>4. Draft and validation</td><td>Operator saves incomplete draft; tries submitting with blank dimensions/outcomes. Enter A values but good=79; try submit; restore good=80.</td><td>Draft saves. Missing measurements block submission; explicit zero differs from blank. Residual 1 kg blocks at tolerance 0. Correct balanced record submits.</td></tr>
-<tr><td>5. Negative and unsupported data</td><td>Try negative quantities, missing reasons, zero issued, invalid planned yield, and multiple-material/stage flag.</td><td>Invalid values cannot produce a valid submission; unsupported job structure is rejected rather than silently combined.</td></tr>
-<tr><td>6. Supervisor return/correction</td><td>Supervisor opens A from review queue; returns it with “Confirm damaged material weight.” Operator corrects/clarifies with a correction reason, then resubmits.</td><td>Return without reason blocked. Operator sees returned work. Correction and resubmission preserve audit history.</td></tr>
-<tr><td>7. Approval safeguards</td><td>Approve A without checklist; then complete checks but omit comment; finally add “Pilot measurement checked; below plan reviewed.”</td><td>Missing checklist blocks. Below 90% plan requires explanation. Successful approval records checks/comment; direct edits are locked.</td></tr>
-<tr><td>8. Approved vs awaiting review</td><td>Submit B but leave unapproved. Filter insight to Pilot board/Cutter A/Pilot box/date/kg.</td><td>Approved only: A scrap15, Setup10 =66.7%. Both: scrap25, Setup15 =60%; approved15/submitted10. Drilldown Setup shows A10 and B5.</td></tr>
-<tr><td>9. Comparison</td><td>Compare A as Job A and B as Job B; open source audit; refresh.</td><td>Good +5 kg; yield +5 percentage points; scrap −5 kg and −5 points. B clearly awaits review. Selection persists; audit link reaches history.</td></tr>
-<tr><td>10. Rework</td><td>Create R; resolve pending15 into good10/offcuts2/Damage3 with comment before submitting. Try an excessive transfer and stale version.</td><td>Only valid transfer succeeds, issued remains100, final totals match table. Completed transfers cannot be overwritten by ordinary outcome editing. Review/reopen required if already submitted/approved.</td></tr>
-<tr><td>11. Units, empty data and samples</td><td>Create separate sheets job. Filter kg then sheets; compare unlike units. Try no-match/reversed dates and opt into samples.</td><td>No cross-unit sums or comparison deltas. Clear no-results/date error. Samples explicitly labelled; insight/report defaults exclude them.</td></tr>
-<tr><td>12. Zero scrap</td><td>Create balanced 100 issued/100 good/0 offcuts/0 pending with reason quantity0; submit and approve. Filter specifically to it.</td><td>No largest positive scrap reason; zero scrap is measured, not missing. CSV contains numeric zero rather than blank.</td></tr>
-<tr><td>13. Reports</td><td>Manager opens Reports, chooses A/B scope, exports and opens CSV in spreadsheet. Repeat approved-only, then sheets and no-match.</td><td>Rows/filters agree with screen; dates/status/sample/unit recorded; reason entries match jobs; no mixed total. Empty/error scope cannot export misleading data.</td></tr>
-<tr><td>14. Role restrictions</td><td>Manager/Supervisor/Operator attempt settings/team changes. Operator visits /compare and /reports directly and tries approval.</td><td>Configuration/access writes and approval are denied by server as appropriate; comparison/report pages unavailable to Operator. Manager/Supervisor can review and report.</td></tr>
-<tr><td>15. Invitation/access lifecycle</td><td>Admin rotates unused invite; attempts old link; revokes another invite; suspends a joined test Operator, then restores with reasons.</td><td>Old/revoked links fail; replacement works. Suspended user loses company access, including direct requests; restore preserves jobs/history. Admin cannot suspend/demote themselves.</td></tr>
-<tr><td>16. Company isolation</td><td>Create Second Pilot in another account; attempt to open/call a first-company job using its ID.</td><td>No job data or mutation is allowed without membership. Switching companies changes checklist, work lists, report scope and jobs.</td></tr>
-<tr><td>17. Concurrent updates</td><td>Open same draft in two sessions; save in one; save stale form in the other.</td><td>Conflict is shown; earlier change is not silently overwritten. Reload before resubmitting.</td></tr>
-<tr><td>18. Mobile and persistence</td><td>Repeat own-job correction and review on phone; refresh, log out/back in; temporarily interrupt network.</td><td>No page-wide overflow; tables scroll internally; saved changes persist; loading/errors do not display stale exportable results as current success.</td></tr></table>
-<h2>6. Sign-off before advanced features</h2>
-<p>Record each scenario as Pass / Fail / Not tested, account role, job number, date and observed result. Fix failures before using real production records. Keep Pilot Test separate; historical records are not disposable demo data. Confirm real published-account invitations, company isolation, balance enforcement, review, rework and CSV accuracy before starting an advanced feature.</p>
-<p>Suggested next capability after acceptance: corrective-action tracking linked to recorded scrap issues, responsible staff, evidence and subsequent approved results—without claiming causation merely from a before/after change.</p>
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  /><title>MaterialFlow — Features, roles and pilot test guide</title>
+  <style>
+    body {
+      font:
+        16px/1.65 system-ui,
+        sans-serif;
+      color: #18212b;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    h1,
+    h2,
+    h3 {
+      line-height: 1.25;
+    }
+    h2 {
+      margin-top: 42px;
+      border-bottom: 2px solid #e0a51c;
+      padding-bottom: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+    td,
+    th {
+      border: 1px solid #ccd2d8;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #edf2f4;
+    }
+    .note {
+      border-left: 4px solid #df9c00;
+      background: #fff8e5;
+      padding: 14px;
+    }
+    a {
+      color: #126071;
+    }
+    code {
+      background: #eff2f4;
+      padding: 2px 5px;
+    }
+    @media print {
+      body {
+        font-size: 11px;
+        margin: 0;
+      }
+      h2 {
+        break-after: avoid;
+      }
+      tr {
+        break-inside: avoid;
+      }
+    }
+  </style>
+  <h1>MaterialFlow: complete pilot guide</h1>
+  <p>
+    Core phases 1–5 · Feature inventory, permissions, publishing and acceptance
+    scenarios
+  </p>
+  <p class="note">
+    Use a dedicated <strong>Pilot Test</strong> company, not live factory
+    records. These scenarios are a repeatable acceptance checklist—not a claim
+    that every case below has already been browser-tested. Publishing and
+    real-account login must be verified on your published URL.
+  </p>
+  <h2>1. Publish for employee testing</h2>
+  <ol>
+    <li>
+      Open Replit’s <strong>Publishing</strong> tool /
+      <strong>Publish</strong> button. Review build, database and access
+      settings.
+    </li>
+    <li>
+      For straightforward employee testing choose <strong>Public</strong> app
+      access if your workspace permits it. This removes the Replit
+      deployment-access gate; MaterialFlow still requires sign-in and company
+      membership for company data. The anonymous sample demo remains public. If
+      company policy requires Invite only, authorize each tester at the Replit
+      publishing-access layer <em>and</em> through MaterialFlow Team. These are
+      separate permissions.
+    </li>
+    <li>
+      Review the production database choice. Development and production are
+      separate. If the initial-publish option
+      <strong
+        >Set up your production database with your current development
+        data</strong
+      >
+      is offered, select it only if you intentionally want those records copied.
+      Otherwise create the Pilot Test company after publishing. Do not overwrite
+      an existing production database merely to test.
+    </li>
+    <li>
+      Click Publish and wait for completion. Copy the actual published URL shown
+      by Replit. Do not use a <code>.replit.dev</code> preview link for
+      employees.
+    </li>
+    <li>
+      Open the published URL as Admin. Confirm company records are present if
+      you chose to copy them. Otherwise create a test company. Check the name,
+      role and account shown before proceeding.
+    </li>
+    <li>
+      From <strong>Settings → Team</strong> on the <em>published app</em>,
+      create/copy each invitation. Invitations copied from development point to
+      development and may reference records absent from production. Share the
+      links manually; automatic email delivery is not provided.
+    </li>
+    <li>
+      Use separate browser profiles or devices for Admin, Manager, Supervisor,
+      Operator A and Operator B. Each must sign in with a distinct account.
+      Incognito windows within the same browser can share a session, so profiles
+      are safer.
+    </li>
+    <li>
+      Employees open their invitation, sign in using the existing Replit sign-in
+      flow, and join the company. For email-bound invitations use the matching
+      account email. Check the resulting company and role. An invitation does
+      not switch the currently signed-in account.
+    </li>
+  </ol>
+  <p>
+    If you see Replit’s “You don’t have access to this app,” check the URL and
+    deployment sharing first. That is outside MaterialFlow’s role controls. Do
+    not grant employees project <strong>Editor</strong> access just to use the
+    app; project collaborators can access code and project history.
+  </p>
+  <p>
+    References:
+    <a href="https://docs.replit.com/features/publishing/overview"
+      >Publishing</a
+    >
+    ·
+    <a href="https://docs.replit.com/features/publishing/private-deployments"
+      >Access settings</a
+    >
+    ·
+    <a
+      href="https://docs.replit.com/features/data-and-storage/development-and-production"
+      >Development and production data</a
+    >.
+  </p>
+  <h2>2. Full feature inventory</h2>
+  <table>
+    <tr>
+      <th>Area</th>
+      <th>Available capabilities</th>
+    </tr>
+    <tr>
+      <td>Accounts and companies</td>
+      <td>
+        Existing Replit sign-in; company creation and joining; company switcher;
+        visible identity and role; isolated company records.
+      </td>
+    </tr>
+    <tr>
+      <td>Configuration</td>
+      <td>
+        Company name and balance tolerance; materials, machines, products, scrap
+        reasons and units (kg, sheets, m); rename and activate/deactivate
+        configuration without deleting historical job records; read-only
+        configuration for non-Admins.
+      </td>
+    </tr>
+    <tr>
+      <td>Team and access</td>
+      <td>
+        Admin assigns roles; invitation links/codes, expiry, rotation and
+        revocation; joined-member suspension/restoration; access-change reasons
+        and history. A pending invitation is not a joined employee and cannot
+        receive an assignment.
+      </td>
+    </tr>
+    <tr>
+      <td>Job specifications</td>
+      <td>
+        Job number/date, material, machine, product, unit, sheet dimensions in
+        mm, instructions, planned yield and assigned operator. Save incomplete
+        drafts; submission requires complete measured records.
+      </td>
+    </tr>
+    <tr>
+      <td>Material accounting</td>
+      <td>
+        Issued material, good output, separate reasoned scrap entries, reusable
+        offcuts, offcut size/location notes and pending rework; live
+        reconciliation and yield/scrap indicators; submission blocked outside
+        tolerance.
+      </td>
+    </tr>
+    <tr>
+      <td>Rework</td>
+      <td>
+        Transfer pending material to good, scrap and/or reusable outcomes;
+        issued quantity stays unchanged. Recorded transfers are traceable;
+        ordinary outcome editing cannot erase completed transfers.
+      </td>
+    </tr>
+    <tr>
+      <td>Review and corrections</td>
+      <td>
+        Draft → submitted → approved, or returned for correction; checklist for
+        specifications/quantities/reasons; comments required for exceptions,
+        return/reopen and returned corrections; attention flags for pending
+        rework and below-plan yield; reopen approved records for further work.
+      </td>
+    </tr>
+    <tr>
+      <td>Audit and conflicts</td>
+      <td>
+        Actor, role, action, review comments, versions and recorded changes;
+        concurrent stale updates rejected; company/member checks on server
+        requests.
+      </td>
+    </tr>
+    <tr>
+      <td>Overview and work lists</td>
+      <td>
+        Existing company totals, status counts, per-unit material balance,
+        recorded reasons and recent jobs; setup readiness and role-specific
+        next-action job lists.
+      </td>
+    </tr>
+    <tr>
+      <td>Management insight</td>
+      <td>
+        Largest recorded scrap reason, ties, share of selected scrap, exact
+        filters and source jobs. Approved default; submitted split; sample
+        opt-in; no root-cause or savings claims.
+      </td>
+    </tr>
+    <tr>
+      <td>Comparison</td>
+      <td>
+        Two production jobs side by side: specifications, quantities, rates and
+        scrap reasons; B−A differences; percentage points for rates;
+        missing/different specifications and unit mismatch warnings;
+        source/audit links.
+      </td>
+    </tr>
+    <tr>
+      <td>Reports</td>
+      <td>
+        Filtered production CSV with scope, generation time, review status,
+        sample labels, units, outcomes/rates/specifications and individual
+        scrap-reason entries. Unknown measurements remain blank.
+        Spreadsheet-formula text is neutralized. No totals combining unlike
+        units.
+      </td>
+    </tr>
+  </table>
+  <p class="note">
+    Not included: passwordless email-code sign-in, automatic invitation emails,
+    multiple materials/stages in one job, automatic unit conversion, full offcut
+    inventory, AI-proven causes, cutting optimization or calculated financial
+    savings. Reusable offcuts are recorded material—not proof of realized
+    savings.
+  </p>
+  <h2>3. Role permissions</h2>
+  <table>
+    <tr>
+      <th>Action</th>
+      <th>Admin</th>
+      <th>Manager</th>
+      <th>Supervisor</th>
+      <th>Operator</th>
+    </tr>
+    <tr>
+      <td>Read company jobs/basic overview and configuration</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Create jobs</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Self-assigned</td>
+    </tr>
+    <tr>
+      <td>Edit/submit draft or returned jobs; resolve rework</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Own assigned jobs; legacy unassigned jobs they created</td>
+    </tr>
+    <tr>
+      <td>Assign/reassign jobs</td>
+      <td>Joined operator or self</td>
+      <td>Joined operator or self</td>
+      <td>Joined operator or self</td>
+      <td>No reassignment</td>
+    </tr>
+    <tr>
+      <td>Approve, return, reopen</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Largest recorded scrap contributor</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No dedicated insight</td>
+      <td>No dedicated insight</td>
+    </tr>
+    <tr>
+      <td>Compare jobs and CSV reports</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No dedicated page/export</td>
+    </tr>
+    <tr>
+      <td>Edit company settings; administer team/access</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+  </table>
+  <p>
+    Operators can read other company jobs; assignments restrict modification,
+    not company-wide visibility. Report-page restrictions do not make the
+    underlying company job data confidential from operators. Authorized
+    reviewers can review their own jobs, supporting small teams. No destructive
+    job-delete workflow is provided.
+  </p>
+  <h2>4. Test setup and known quantities</h2>
+  <p>
+    Create Pilot Test with unit kg; configure material
+    <strong>Pilot board</strong>, machine <strong>Cutter A</strong>, product
+    <strong>Pilot box</strong>, reasons <strong>Setup/layout</strong> and
+    <strong>Damaged material</strong>. Set tolerance <strong>0</strong> for
+    exact test arithmetic. Invite the four additional accounts and have them
+    join. Assign Operator A to the test jobs. Use today's date and unique job
+    numbers.
+  </p>
+  <p>
+    For new jobs use dimensions 700 × 1000 mm, instructions “Pilot test; verify
+    all weights,” and planned yield 90%. These are illustrative test values, not
+    manufacturing recommendations.
+  </p>
+  <table>
+    <tr>
+      <th>Job</th>
+      <th>Issued</th>
+      <th>Good</th>
+      <th>Offcuts</th>
+      <th>Scrap</th>
+      <th>Pending</th>
+      <th>Expected</th>
+    </tr>
+    <tr>
+      <td>PILOT-A</td>
+      <td>100 kg</td>
+      <td>80</td>
+      <td>5</td>
+      <td>Setup 10 + Damage 5</td>
+      <td>0</td>
+      <td>Balanced; yield 80%; scrap 15%; reusable 5%</td>
+    </tr>
+    <tr>
+      <td>PILOT-B</td>
+      <td>100 kg</td>
+      <td>85</td>
+      <td>5</td>
+      <td>Setup 5 + Damage 5</td>
+      <td>0</td>
+      <td>Balanced; yield 85%; scrap 10%</td>
+    </tr>
+    <tr>
+      <td>PILOT-R before resolution</td>
+      <td>100 kg</td>
+      <td>70</td>
+      <td>5</td>
+      <td>Setup 10</td>
+      <td>15</td>
+      <td>Balanced; pending is neither good nor scrap</td>
+    </tr>
+    <tr>
+      <td>PILOT-R after transfer</td>
+      <td>100 kg</td>
+      <td>80</td>
+      <td>7</td>
+      <td>Setup 10 + Damage 3</td>
+      <td>0</td>
+      <td>Transfer 10 to good, 2 offcuts, 3 scrap; still balances</td>
+    </tr>
+  </table>
+  <h2>5. End-to-end acceptance scenarios</h2>
+  <table>
+    <tr>
+      <th>Test</th>
+      <th>Steps</th>
+      <th>Expected result</th>
+    </tr>
+    <tr>
+      <td>1. Setup readiness</td>
+      <td>
+        Admin creates an empty company; opens checklist; adds each
+        configuration; invites staff, then staff join.
+      </td>
+      <td>
+        Configuration readiness reflects active settings. Pending invitations
+        are distinct from joined active members. Completing setup does not mark
+        a job approved.
+      </td>
+    </tr>
+    <tr>
+      <td>2. Identity and invitations</td>
+      <td>
+        Invite each role; open each link in its own browser profile; reload
+        after joining.
+      </td>
+      <td>
+        Correct account, company and role persist. Using the existing Admin
+        session does not become the invited employee.
+      </td>
+    </tr>
+    <tr>
+      <td>3. Assignment</td>
+      <td>
+        Admin creates PILOT-A draft and assigns Operator A; Operator A opens
+        Overview.
+      </td>
+      <td>
+        Job appears in their work list. Invited-but-not-joined people are not
+        assignable. Operator B can read but cannot edit/submit A’s assigned job.
+      </td>
+    </tr>
+    <tr>
+      <td>4. Draft and validation</td>
+      <td>
+        Operator saves incomplete draft; tries submitting with blank
+        dimensions/outcomes. Enter A values but good=79; try submit; restore
+        good=80.
+      </td>
+      <td>
+        Draft saves. Missing measurements block submission; explicit zero
+        differs from blank. Residual 1 kg blocks at tolerance 0. Correct
+        balanced record submits.
+      </td>
+    </tr>
+    <tr>
+      <td>5. Negative and unsupported data</td>
+      <td>
+        Try negative quantities, missing reasons, zero issued, invalid planned
+        yield, and multiple-material/stage flag.
+      </td>
+      <td>
+        Invalid values cannot produce a valid submission; unsupported job
+        structure is rejected rather than silently combined.
+      </td>
+    </tr>
+    <tr>
+      <td>6. Supervisor return/correction</td>
+      <td>
+        Supervisor opens A from review queue; returns it with “Confirm damaged
+        material weight.” Operator corrects/clarifies with a correction reason,
+        then resubmits.
+      </td>
+      <td>
+        Return without reason blocked. Operator sees returned work. Correction
+        and resubmission preserve audit history.
+      </td>
+    </tr>
+    <tr>
+      <td>7. Approval safeguards</td>
+      <td>
+        Approve A without checklist; then complete checks but omit comment;
+        finally add “Pilot measurement checked; below plan reviewed.”
+      </td>
+      <td>
+        Missing checklist blocks. Below 90% plan requires explanation.
+        Successful approval records checks/comment; direct edits are locked.
+      </td>
+    </tr>
+    <tr>
+      <td>8. Approved vs awaiting review</td>
+      <td>
+        Submit B but leave unapproved. Filter insight to Pilot board/Cutter
+        A/Pilot box/date/kg.
+      </td>
+      <td>
+        Approved only: A scrap15, Setup10 =66.7%. Both: scrap25, Setup15 =60%;
+        approved15/submitted10. Drilldown Setup shows A10 and B5.
+      </td>
+    </tr>
+    <tr>
+      <td>9. Comparison</td>
+      <td>Compare A as Job A and B as Job B; open source audit; refresh.</td>
+      <td>
+        Good +5 kg; yield +5 percentage points; scrap −5 kg and −5 points. B
+        clearly awaits review. Selection persists; audit link reaches history.
+      </td>
+    </tr>
+    <tr>
+      <td>10. Rework</td>
+      <td>
+        Create R; resolve pending15 into good10/offcuts2/Damage3 with comment
+        before submitting. Try an excessive transfer and stale version.
+      </td>
+      <td>
+        Only valid transfer succeeds, issued remains100, final totals match
+        table. Completed transfers cannot be overwritten by ordinary outcome
+        editing. Review/reopen required if already submitted/approved.
+      </td>
+    </tr>
+    <tr>
+      <td>11. Units, empty data and samples</td>
+      <td>
+        Create separate sheets job. Filter kg then sheets; compare unlike units.
+        Try no-match/reversed dates and opt into samples.
+      </td>
+      <td>
+        No cross-unit sums or comparison deltas. Clear no-results/date error.
+        Samples explicitly labelled; insight/report defaults exclude them.
+      </td>
+    </tr>
+    <tr>
+      <td>12. Zero scrap</td>
+      <td>
+        Create balanced 100 issued/100 good/0 offcuts/0 pending with reason
+        quantity0; submit and approve. Filter specifically to it.
+      </td>
+      <td>
+        No largest positive scrap reason; zero scrap is measured, not missing.
+        CSV contains numeric zero rather than blank.
+      </td>
+    </tr>
+    <tr>
+      <td>13. Reports</td>
+      <td>
+        Manager opens Reports, chooses A/B scope, exports and opens CSV in
+        spreadsheet. Repeat approved-only, then sheets and no-match.
+      </td>
+      <td>
+        Rows/filters agree with screen; dates/status/sample/unit recorded;
+        reason entries match jobs; no mixed total. Empty/error scope cannot
+        export misleading data.
+      </td>
+    </tr>
+    <tr>
+      <td>14. Role restrictions</td>
+      <td>
+        Manager/Supervisor/Operator attempt settings/team changes. Operator
+        visits /compare and /reports directly and tries approval.
+      </td>
+      <td>
+        Configuration/access writes and approval are denied by server as
+        appropriate; comparison/report pages unavailable to Operator.
+        Manager/Supervisor can review and report.
+      </td>
+    </tr>
+    <tr>
+      <td>15. Invitation/access lifecycle</td>
+      <td>
+        Admin rotates unused invite; attempts old link; revokes another invite;
+        suspends a joined test Operator, then restores with reasons.
+      </td>
+      <td>
+        Old/revoked links fail; replacement works. Suspended user loses company
+        access, including direct requests; restore preserves jobs/history. Admin
+        cannot suspend/demote themselves.
+      </td>
+    </tr>
+    <tr>
+      <td>16. Company isolation</td>
+      <td>
+        Create Second Pilot in another account; attempt to open/call a
+        first-company job using its ID.
+      </td>
+      <td>
+        No job data or mutation is allowed without membership. Switching
+        companies changes checklist, work lists, report scope and jobs.
+      </td>
+    </tr>
+    <tr>
+      <td>17. Concurrent updates</td>
+      <td>
+        Open same draft in two sessions; save in one; save stale form in the
+        other.
+      </td>
+      <td>
+        Conflict is shown; earlier change is not silently overwritten. Reload
+        before resubmitting.
+      </td>
+    </tr>
+    <tr>
+      <td>18. Mobile and persistence</td>
+      <td>
+        Repeat own-job correction and review on phone; refresh, log out/back in;
+        temporarily interrupt network.
+      </td>
+      <td>
+        No page-wide overflow; tables scroll internally; saved changes persist;
+        loading/errors do not display stale exportable results as current
+        success.
+      </td>
+    </tr>
+  </table>
+  <h2>6. Sign-off before advanced features</h2>
+  <p>
+    Record each scenario as Pass / Fail / Not tested, account role, job number,
+    date and observed result. Fix failures before using real production records.
+    Keep Pilot Test separate; historical records are not disposable demo data.
+    Confirm real published-account invitations, company isolation, balance
+    enforcement, review, rework and CSV accuracy before starting an advanced
+    feature.
+  </p>
+  <p>
+    Suggested next capability after acceptance: corrective-action tracking
+    linked to recorded scrap issues, responsible staff, evidence and subsequent
+    approved results—without claiming causation merely from a before/after
+    change.
+  </p>
 </html>
