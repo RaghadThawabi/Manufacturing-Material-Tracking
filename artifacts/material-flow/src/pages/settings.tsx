@@ -75,7 +75,7 @@ function SettingRow({ s, admin }: { s: Setting; admin: boolean }) {
 
 function SettingsLists({ admin }: { admin: boolean }) {
   const { company } = useCompany();
-  const [kind, setKind] = useState<SettingKind>("material");
+  const [kind, setKind] = useState<SettingKind>(() => { const k = new URLSearchParams(window.location.search).get("kind"); return (KINDS.some((x) => x.kind === k) ? k : "material") as SettingKind; });
   const [name, setName] = useState("");
   const add = useAddSetting();
   const qc = useQueryClient();
@@ -114,7 +114,7 @@ export default function Settings() {
     <>
       <PageHeader eyebrow={company!.name} title="Settings" />
       {!admin && <p className="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">You are viewing as {company!.role}. Only admins can change configuration.</p>}
-      <Tabs defaultValue="config">
+      <Tabs defaultValue={new URLSearchParams(window.location.search).get("tab") === "team" ? "team" : "config"}>
         <TabsList className="mb-4 h-11"><TabsTrigger value="config" className="h-9 px-5" data-testid="tab-config">Configuration</TabsTrigger><TabsTrigger value="team" className="h-9 px-5" data-testid="tab-team">Team access</TabsTrigger></TabsList>
         <TabsContent value="config" className="space-y-6"><CompanyCard key={company!.id} admin={admin} /><SettingsLists admin={admin} /></TabsContent>
         <TabsContent value="team">{admin ? <Team /> : <p className="p-4 text-muted-foreground">Team membership and invitations are managed by your company administrator.</p>}</TabsContent>

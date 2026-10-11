@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SummaryBoard, summarize, JobRow, ErrorPanel, PageHeader } from "@/components/mf-ui";
 import { Logo } from "@/components/shell";
 import { errMsg, useCompany } from "@/lib/mf";
+import { SetupChecklist, WorkLists } from "@/components/workboard";
 import { ScrapInsight } from "@/components/scrap-insight";
 
 function BoardSkeleton() {
@@ -58,13 +59,15 @@ function Dashboard() {
   const { company } = useCompany();
   const id = company!.id;
   const s = useGetSummary(id, { query: { queryKey: getGetSummaryQueryKey(id), refetchInterval: 30000 } });
-  const jobs = useListJobs(id, { query: { queryKey: getListJobsQueryKey(id) } });
+  const jobs = useListJobs(id, { query: { queryKey: getListJobsQueryKey(id), refetchInterval: 15000 } });
   const recent = [...(jobs.data ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 6);
   return (
     <>
       <PageHeader eyebrow={company!.name} title="Overview">
         <Button asChild size="lg" className="h-12"><Link href="/jobs/new" data-testid="link-record-job"><Plus />Record job</Link></Button>
       </PageHeader>
+      <SetupChecklist />
+      <WorkLists jobs={jobs.data} loading={jobs.isLoading} error={jobs.error} onRetry={() => jobs.refetch()} />
       <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground" data-testid="text-dashboard-scope">Company dashboard · all dates · units shown separately · quantities from submitted + approved jobs · counts include all statuses</p>
       {s.isLoading ? <BoardSkeleton /> : s.error ? <ErrorPanel message={errMsg(s.error)} onRetry={() => s.refetch()} /> : s.data && <SummaryBoard summary={s.data} />}
       {(company!.role === "admin" || company!.role === "manager") && <ScrapInsight key={id} companyId={id} />}

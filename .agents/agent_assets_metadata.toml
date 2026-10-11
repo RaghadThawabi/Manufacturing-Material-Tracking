@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "U0ZYYhLo5jj4v1__mBpHa"
+uri = "file://docs/materialflow-pilot-guide.html"
+type = "html"
+title = "MaterialFlow — Complete Features, Roles & Pilot Test Guide"
+description = "Publishing instructions, full feature and permission inventory, known test quantities, and 18 acceptance scenarios. Open in a browser or print to PDF."
+logical_id = "f0bf339a-a9ea-447f-a69d-1e745a3d9787"
+content_hash = "sha256:99c93ad698508bdcb69f01ac06328e2c7954382d6022984c7e8bcaa8c3c57bd5"
+size = 16682
+mtime_ms = 1791703283040
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:6ad1b8ed-4278-447d-9bb8-9807bb5a0f6d/f0bf339a-a9ea-447f-a69d-1e745a3d9787/ad0dd609-18b2-4c4b-b427-f201fc1ae863"
+storage_version_token = "1791704202024632"
+content_type = "text/html"

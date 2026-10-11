@@ -37,7 +37,7 @@ export default function JobNew() {
   return (
     <>
       <PageHeader eyebrow="New record" title="Record a job" />
-      {as.isLoading ? <div className="h-64 animate-pulse rounded-md bg-muted" /> : <JobWizard company={company!} recordingVersion={2} assignees={assignees} assignMode={reviewer ? "any" : "self"}
+      {as.isLoading || !user ? <div className="h-64 animate-pulse rounded-md bg-muted" /> : <JobWizard key={`${id}:${user.id}`} company={company!} recordingVersion={2} assignees={assignees} assignMode={reviewer ? "any" : "self"}
         initial={{ ...emptyJob(company), assignedTo: reviewer ? null : user?.id ?? null }} pending={create.isPending || transition.isPending} error={err} onSave={save} onCancel={() => nav("/jobs")} />}
     </>
   );
