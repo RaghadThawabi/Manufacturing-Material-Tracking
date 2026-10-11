@@ -14,3 +14,17 @@ mtime_ms = 1791703283040
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:6ad1b8ed-4278-447d-9bb8-9807bb5a0f6d/f0bf339a-a9ea-447f-a69d-1e745a3d9787/ad0dd609-18b2-4c4b-b427-f201fc1ae863"
 storage_version_token = "1791704202024632"
 content_type = "text/html"
+
+[[outputs]]
+id = "BB8OvNWQnuZWdqWhijNxD"
+uri = "file://generated-artifacts/materialflow-pilot-guide.pdf"
+type = "pdf"
+title = "MaterialFlow Pilot Guide — PDF"
+description = "7-page PDF with publishing instructions, all features and roles, and 18 testing scenarios."
+logical_id = "718d9658-9e17-4235-bc3b-a1c2f2a56240"
+content_hash = "sha256:a37c1c9ac9066db1b912493672505fa00f863935956257082b822b41bc1d8f05"
+size = 190237
+mtime_ms = 1791704640820
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:6ad1b8ed-4278-447d-9bb8-9807bb5a0f6d/718d9658-9e17-4235-bc3b-a1c2f2a56240/e13d7efd-4217-4b01-b156-8fe362829567"
+storage_version_token = "1791704652581151"
+content_type = "application/pdf"
